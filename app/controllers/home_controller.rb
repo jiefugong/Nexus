@@ -19,6 +19,6 @@ class HomeController < ApplicationController
 	def base
 		@subreddits = Subreddit.all
 		Scraper::scrape_subreddits(@subreddits)
-		@entriesArray = Entry.where(subreddit: 'popular')
+		@entriesArray = Entry.all
 	end
 end
