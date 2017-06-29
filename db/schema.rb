@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170625125459) do
+ActiveRecord::Schema.define(version: 20170628154028) do
 
   create_table "entries", force: :cascade do |t|
     t.string   "subreddit"
@@ -18,6 +18,7 @@ ActiveRecord::Schema.define(version: 20170625125459) do
     t.text     "link"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer  "score"
   end
 
   create_table "subreddits", force: :cascade do |t|
