@@ -17,12 +17,13 @@ module Scraper
 		require 'open-uri'
 		doc = Nokogiri::HTML(open("https://www.reddit.com/r/" + subreddit + "/", 'User-Agent' => 'Tempest'))
 
-		entries = doc.css('.entry')
+		entries = doc.css('.thing')
 		entriesArray = []
 		entries.each do |entry|
 			title = entry.css('p.title>a').text
       		link = entry.css('p.title>a')[0]['href']
-      		completeEntry = Entry.create(subreddit: subreddit, title: title, link: link)
+      		score = entry.css('.score')[1].text.to_i
+      		completeEntry = Entry.create(subreddit: subreddit, title: title, link: link, score: score)
       	end
 	end
 end
