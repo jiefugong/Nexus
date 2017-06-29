@@ -23,7 +23,6 @@ module Scraper
 
 		subreddits.each do |subreddit|
 			self.scrape_subreddit(subreddit.subreddit)
-			sleep 1
 		end
 	end
 

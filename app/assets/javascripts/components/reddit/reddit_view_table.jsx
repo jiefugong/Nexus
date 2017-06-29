@@ -124,8 +124,8 @@ class RedditViewTable extends React.Component {
 						{this.renderSubredditButtons()}
 					</div>
 					<div className="col-xs-3">
-						<input className="btn btn-default btn-primary pull-right" type="button" value="Sort" onClick={() => this.sortEntriesByScore()}></input>
-						<a className="btn btn-default btn-primary pull-right" href="/settings">Settings</a>
+						<input className="btn btn-default btn-primary reddit-module-action" type="button" value="Sort" onClick={() => this.sortEntriesByScore()}></input>
+						<a className="btn btn-default btn-primary reddit-module-action" href="/settings">Settings</a>
 					</div>
 				</div>
 			</div>
