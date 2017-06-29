@@ -16,6 +16,19 @@ class RedditViewTable extends React.Component {
 			this.state.results.filter((result) => result.subreddit === this.state.activeSubreddit);
 	}
 
+	_sortByScoreComparator(entry1, entry2) {
+		if (entry1.score === entry2.score) {
+			return 0;
+		}
+		return entry1.score > entry2.score ? -1 : 1;
+	}
+
+	sortEntriesByScore() {
+		this.setState({
+			activeEntries : this.state.activeEntries.sort(this._sortByScoreComparator)
+		});
+	}
+
 	switchActiveSubreddit(newSubreddit) {
 		this.setState({
 			activeSubreddit: newSubreddit
@@ -26,11 +39,27 @@ class RedditViewTable extends React.Component {
 		});
 	}
 
+	_formatLinkType(link) {
+		let urlType = "Link";
+		const imageIdentifier = ['gifv', 'png', 'jpg', 'jpeg', 'imgur'];
+		const url = link.indexOf("http") === 0 ? link : "https://www.reddit.com" + link;
+
+		for (imageFormat of imageIdentifier) {
+			if (link.indexOf(imageFormat) !== -1) {
+				urlType = "Photo";
+				break;
+			}
+		}
+
+		return {
+			'url' : url,
+			'urlType' : urlType,
+		}
+	}
+
 	renderTableEntry(id, score, title, link) {
-		const entryLink = link.indexOf("http") === 0 ? link : "https://www.reddit.com" + link;
 		/* TODO: See if ES6 method is available */
-		/* TODO: Incorrect method of determining if link is actual link or photo, also should include discussion thread */
-		const entryLabel = link.indexOf("/r") === 0 ? "Link" : "Photo";
+		const linkObject = this._formatLinkType(link);
 		const scoreLabel = score == 0 ? "-" : score
 		return (
 			<tr key={id}>
@@ -41,7 +70,7 @@ class RedditViewTable extends React.Component {
 					{scoreLabel}
 				</td>
 				<td>
-					<a href={entryLink}>{entryLabel}</a>
+					<a href={linkObject.url}>{linkObject.urlType}</a>
 				</td>
 			</tr>
 		)
@@ -85,7 +114,8 @@ class RedditViewTable extends React.Component {
 						{this.renderSubredditButtons()}
 					</div>
 					<div className="col-xs-3">
-						<input className="btn btn-default" id= "add-subreddit" type="button" value="Add Subreddit"></input>
+						<input className="btn btn-default reddit-module-action" type="button" value="Add Subreddit"></input>
+						<input className="btn btn-default reddit-module-action" type="button" value="Sort" onClick={() => this.sortEntriesByScore()}></input>
 					</div>
 				</div>
 			</div>
