@@ -1,17 +1,7 @@
 <div id="main-container" class="container">
 	<div class="row">
 		<h1 class="text-center"> Global Module Settings </h1>
-		<div class="col-xs-6">
-			<%= react_component("RedditSettingsModule", {subreddits: @subreddits}) %>
-			<form class="form-inline">
-			  <div class="form-group">
-			    <div class="input-group">
-			      <input type="text" class="form-control" placeholder="Subreddit">
-			    </div>
-			  </div>
-			  <button type="submit" class="btn btn-primary">Add Subreddit</button>
-			</form>
-		</div>
+		<%= react_component("RedditSettingsModule", {subreddits: @subreddits}) %>
 		<div class="col-xs-6">
 		</div>
 	</div>

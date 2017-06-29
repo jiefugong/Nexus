@@ -7,6 +7,23 @@ class RedditSettingsModule extends React.Component {
 		};
 	}
 
+	_alterActiveSubreddits(request_type, subreddit) {
+		$.ajax({
+			type: request_type,
+			url: '/settings',
+			data: {subreddit: subreddit},
+			dataType: 'json',
+			success: function(data) {
+				this.setState({
+					activeSubreddits: data,
+				})
+			}.bind(this),
+			error: function(data) {
+				console.log("Could not complete request to alter subreddits");
+			}
+		})
+	}
+
 	componentWillMount() {
 		this.state.activeSubreddits = this.props.subreddits;
 	}
@@ -18,7 +35,7 @@ class RedditSettingsModule extends React.Component {
 					{subreddit}
 				</td>
 				<td>
-					<button type="button" className="close pull-right" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<button type="button" className="close pull-right" aria-label="Close" onClick={() => this._alterActiveSubreddits(DELETE, subreddit)}><span aria-hidden="true">&times;</span></button>
 				</td>
 			</tr>
 		)
@@ -30,18 +47,29 @@ class RedditSettingsModule extends React.Component {
 
 	render() {
 		return (
-			<table className="table table-striped">
-				<tbody>
-					<tr>
-						<td>
-							<strong> Subscribed Subreddits </strong>
-						</td>
-						<td>
-						</td>
-					</tr>
-					{this.renderSubreddits()}
-				</tbody>
-			</table>
+			<div className="col-xs-6">
+				<table className="table table-striped">
+					<tbody>
+						<tr>
+							<td>
+								<strong> Subscribed Subreddits </strong>
+							</td>
+							<td>
+							</td>
+						</tr>
+						{this.renderSubreddits()}
+					</tbody>
+				</table>
+				<form className="form-inline">
+				  <div className="form-group">
+				    <div className="input-group">
+				      <input type="text" className="form-control" id="submit-subreddit" placeholder="Subreddit"></input>
+				    </div>
+				  </div>
+				  <button type="submit" className="btn btn-primary" onClick={() => this._alterActiveSubreddits(POST, $("#submit-subreddit").val())}>Add Subreddit</button>
+				  <a className="btn btn-primary pull-right" href="/">Main Page</a>
+				</form>
+			</div>
 		)
 	}
 }
