@@ -1,13 +1,14 @@
 /* Functional Component for View of Entry Item */
 function ViewBox(props) {
 	return (
-		<div>
-			<p className="lead">
+		<div className="view-box">
+			<p className="lead active-entry-title">
 				{props.title}
 			</p>
-			<p>
+			<p className="active-entry-text">
 				{props.text}
 			</p>
+			<textarea className="form-control active-entry-edit hidden" rows="5"></textarea>
 		</div>
 	)
 }
@@ -33,6 +34,56 @@ class NotesViewTable extends React.Component {
 		this.state.allTopics = this.props.allTopics;
 		this.state.results = this.props.results;
 		this.state.activeEntries = this.props.results.filter((result) => result.topic === this.props.activeTopic);
+	}
+
+	_toggleNoteEditElements() {
+		let $activeEntryText = $(".active-entry-text");
+		let $activeEntryEditBox = $(".active-entry-edit");
+		let $activeEntryEditButton = $(".active-entry-edit-button");
+		let $activeEntrySaveButton = $(".active-entry-save-button");
+
+		for (item of [$activeEntryText, $activeEntryEditBox, $activeEntryEditButton, $activeEntrySaveButton]) {
+			item.hasClass("hidden") ? item.removeClass("hidden") : item.addClass("hidden");
+		}
+	}
+
+	editClickedNote() {
+		let $activeEntryEditBox = $(".active-entry-edit");
+		let $activeEntryText = $(".active-entry-text");
+
+		this._toggleNoteEditElements();
+		$activeEntryEditBox.val($activeEntryText.html());
+	}
+
+	saveNewNote(entry) {
+		$.ajax({
+			type: POST,
+			url: '/',
+			data: {
+				title: this.state.activeEntry.title,
+				entry: entry
+			},
+			dataType: 'json',
+			success: function(data) {
+				this.setState({
+					activeEntry: data,
+				});
+				let newActiveEntries = []
+				for (activeEntry of this.state.activeEntries) {
+					newActiveEntries.push($.extend(true, {}, activeEntry));
+				}
+				newActiveEntries.filter((activeEntry) => activeEntry.title === data.title)[0].entry = data.entry;
+
+				this.setState({
+					activeEntries: newActiveEntries,
+				});
+			}.bind(this),
+			error: function(data) {
+				console.log("Could not complete request save new note");
+			}
+		});
+
+		this._toggleNoteEditElements();
 	}
 
 	_selectClickedButton(newTopic) {
@@ -122,6 +173,8 @@ class NotesViewTable extends React.Component {
 						title={this.state.activeEntry.title}
 						text={this.state.activeEntry.entry}
 					/>
+					<button type="button" className="btn btn-primary btn-xs pull-right active-entry-edit-button" onClick={() => this.editClickedNote()}>Edit Post</button>
+					<button type="button" className="btn btn-primary btn-xs pull-right active-entry-save-button hidden" onClick={() => this.saveNewNote($(".active-entry-edit").val())}>Save Post</button>
 				</div>
 			</div>
 		)
