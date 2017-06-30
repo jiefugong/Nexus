@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170628154028) do
+ActiveRecord::Schema.define(version: 20170630045104) do
 
   create_table "entries", force: :cascade do |t|
     t.string   "subreddit"
@@ -19,6 +19,14 @@ ActiveRecord::Schema.define(version: 20170628154028) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer  "score"
+  end
+
+  create_table "notes", force: :cascade do |t|
+    t.string   "title"
+    t.string   "topic"
+    t.text     "entry"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "subreddits", force: :cascade do |t|

@@ -77,11 +77,21 @@ class RedditViewTable extends React.Component {
 
 	renderTableEntries() {
 		if (this.state.activeEntries !== null) {
-			return this.state.activeEntries.map((result) => this.renderTableEntry(result.id, result.score, result.title, result.link));
+			if (this.state.activeEntries.length > 0) {
+				return this.state.activeEntries.map((result) => this.renderTableEntry(result.id, result.score, result.title, result.link));
+			} else {
+				return (
+					<tr>
+						<td className="text-muted">
+							No results! Check to make sure you entered a valid subreddit.
+						</td>
+					</tr>
+				)
+			}
 		} else {
 			return (
 				<tr>
-					<td>
+					<td className="text-muted">
 						Click on a Subreddit to see results!
 					</td>
 				</tr>
@@ -91,7 +101,7 @@ class RedditViewTable extends React.Component {
 
 	renderSubredditButton(id, subreddit) {
 		return (
-			<input key={id} className="btn btn-default" type="button" value={subreddit} onClick={() => this.switchActiveSubreddit(subreddit)}></input>
+			<input key={id} className="btn btn-default btn-warning" type="button" value={subreddit} onClick={() => this.switchActiveSubreddit(subreddit)}></input>
 		)
 	}
 
@@ -101,31 +111,31 @@ class RedditViewTable extends React.Component {
 
 	render() {
 		return (
-			<div id="main-container" className="container">
+			<div className="col-xs-12">
+				<h1> Subreddit Digest for {this.state.activeSubreddit} </h1>
+				<table className="table table-striped table-hover">
+					<tbody>
+						<tr>
+							<td>
+								<strong>Title</strong>
+							</td>
+							<td>
+								<strong>Score</strong>
+							</td>
+							<td>
+								<strong>Link</strong>
+							</td>
+						</tr>
+						{this.renderTableEntries()}
+					</tbody>
+				</table>
 				<div className="row">
-					<h1> Subreddit Digest for {this.state.activeSubreddit} </h1>
-					<table className="table table-striped">
-						<tbody>
-							<tr>
-								<td>
-									<strong>Title</strong>
-								</td>
-								<td>
-									<strong>Score</strong>
-								</td>
-								<td>
-									<strong>Link</strong>
-								</td>
-							</tr>
-							{this.renderTableEntries()}
-						</tbody>
-					</table>
 					<div className="col-xs-9">
 						{this.renderSubredditButtons()}
 					</div>
 					<div className="col-xs-3">
-						<input className="btn btn-default btn-primary reddit-module-action" type="button" value="Sort" onClick={() => this.sortEntriesByScore()}></input>
-						<a className="btn btn-default btn-primary reddit-module-action" href="/settings">Settings</a>
+						<input className="btn btn-default btn-primary pull-right" type="button" value="Sort" onClick={() => this.sortEntriesByScore()}></input>
+						<a className="btn btn-default btn-primary pull-right" href="/settings">Settings</a>
 					</div>
 				</div>
 			</div>

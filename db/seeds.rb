@@ -6,23 +6,20 @@
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
 
-Subreddit.destroy_all
+Note.destroy_all
 
-Subreddit.create!([{
-		subreddit: "popular"
+Note.create!([{
+		title: "Sample Title 1",
+		topic: "Fitness",
+		entry: "This is sample text"
 		},
 	{
-		subreddit: "politics"
+		title: "Sample Title 2",
+		topic: "Fitness",
+		entry: "This is more sample text"
 		},
 	{
-		subreddit: "leagueoflegends"
-		},
-	{
-		subreddit: "worldnews"
-		},
-	{
-		subreddit: "askreddit"
-		},
-	{
-		subreddit: "frugalmalefashion"
+		title: "Sample Title 3",
+		topic: "Gaming",
+		entry: "This is not sample text"
 		}])

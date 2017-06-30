@@ -1,0 +1,1 @@
+const DEFAULT_SUBTEXT_LENGTH = 25;

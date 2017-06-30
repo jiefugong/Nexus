@@ -48,7 +48,7 @@ class RedditSettingsModule extends React.Component {
 	render() {
 		return (
 			<div className="col-xs-6">
-				<table className="table table-striped">
+				<table className="table table-striped table-hover">
 					<tbody>
 						<tr>
 							<td>
