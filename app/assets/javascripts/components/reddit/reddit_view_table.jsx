@@ -71,7 +71,7 @@ class RedditViewTable extends React.Component {
 		const linkObject = this._formatLinkType(link);
 		const scoreLabel = score == 0 ? "-" : score
 		return (
-			<tr key={id}>
+			<tr key={id} className="module-table-row">
 				<td>
 					{title}
 				</td>

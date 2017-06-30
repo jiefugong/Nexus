@@ -21,8 +21,8 @@ class NotesViewTable extends React.Component {
 			activeTopic: null,
 			allTopics: null,
 			activeEntry: {
-				title: "Please click on an entry to get started!",
-				entry: "Check the left hand side for all the currently stored notes entries by topic!"
+				title: "Please click on an entry to view",
+				entry: "Check the left hand side for all the currently stored notes entries by topic"
 			},
 			activeEntries: null,
 			results: null,
@@ -105,7 +105,16 @@ class NotesViewTable extends React.Component {
 		})
 	}
 
+	_selectClickedRow(title) {
+		//TODO: We're getting real hacky now...
+		$(".success").removeClass("success");
+		$("#" + title.replace(/ /g, '') + "row").addClass("success");
+	}
+
 	switchActiveEntry(title) {
+		$(".active-entry-edit-button").removeClass("disabled");
+		this._selectClickedRow(title);
+
 		this.setState({
 			// TODO: May not work depending on initial object
 			activeEntry: this.state.activeEntries.filter((entry) => entry.title === title)[0]
@@ -114,15 +123,12 @@ class NotesViewTable extends React.Component {
 
 	renderTableEntry(id, title, text) {
 		return (
-			<tr key={id} onClick={() => this.switchActiveEntry(title)}>
+			<tr key={id} className="module-table-row" id={title.replace(/ /g, '') + "row"} onClick={() => this.switchActiveEntry(title)}>
 				<td>
 					{title}
 				</td>
 				<td>
 					{text.substring(0, DEFAULT_SUBTEXT_LENGTH) + "..."}
-				</td>
-				<td>
-					{this.state.activeTopic}
 				</td>
 			</tr>
 		)
@@ -155,9 +161,6 @@ class NotesViewTable extends React.Component {
 								<td>
 									<strong> Preview </strong>
 								</td>
-								<td>
-									<strong> Topic </strong>
-								</td>
 							</tr>
 							{this.renderTableEntries()}
 						</tbody>
@@ -173,7 +176,8 @@ class NotesViewTable extends React.Component {
 						title={this.state.activeEntry.title}
 						text={this.state.activeEntry.entry}
 					/>
-					<button type="button" className="btn btn-primary btn-xs pull-right active-entry-edit-button" onClick={() => this.editClickedNote()}>Edit Post</button>
+					<button type="button" className="btn btn-primary btn-xs pull-right active-entry-edit-button disabled" onClick={() => this.editClickedNote()}>Edit Post</button>
+					<button type="button" className="btn btn-primary btn-xs pull-right active-entry-add-button" disabled="disabled">Add Post</button>
 					<button type="button" className="btn btn-primary btn-xs pull-right active-entry-save-button hidden" onClick={() => this.saveNewNote($(".active-entry-edit").val())}>Save Post</button>
 				</div>
 			</div>

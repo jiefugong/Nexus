@@ -30,7 +30,7 @@ class RedditSettingsModule extends React.Component {
 
 	renderSubreddit(id, subreddit) {
 		return (
-			<tr key={id} >
+			<tr key={id} className="module-table-row">
 				<td>
 					{subreddit}
 				</td>
