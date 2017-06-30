@@ -2,10 +2,12 @@
 	<div class="row reddit-module">
 		<%= react_component("RedditViewTable", {entries: @entriesArray, subreddits: @subreddits}) %>
 	</div>
-	<div class="row">
-		<div class="col-xs-12">
-			<h1> NotePad </h1>
+	<div class="notes-module">
+		<div class="row">
+			<div class="col-xs-12">
+				<h1> NotePad </h1>
+			</div>
 		</div>
+		<%= react_component("NotesViewTable", {activeTopic: @activeTopic, allTopics: @topics, results: @submissionsArray}) %>
 	</div>
-	<%= react_component("NotesViewTable", {activeTopic: @activeTopic, allTopics: @topics, results: @submissionsArray}) %>
 </div>

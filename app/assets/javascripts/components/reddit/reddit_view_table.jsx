@@ -29,7 +29,17 @@ class RedditViewTable extends React.Component {
 		});
 	}
 
+	_selectClickedButton(newSubreddit) {
+		// TODO: There has to be a better way to use the JQuery selector than this...
+		if (this.state.activeSubreddit !== "...") {
+			$("#" + this.state.activeSubreddit + "_selector").removeClass("active");
+		}
+		$("#" + newSubreddit + "_selector").addClass("active");
+	}
+
 	switchActiveSubreddit(newSubreddit) {
+		this._selectClickedButton(newSubreddit);
+
 		this.setState({
 			activeSubreddit: newSubreddit
 		});
@@ -101,7 +111,7 @@ class RedditViewTable extends React.Component {
 
 	renderSubredditButton(id, subreddit) {
 		return (
-			<input key={id} className="btn btn-default btn-warning" type="button" value={subreddit} onClick={() => this.switchActiveSubreddit(subreddit)}></input>
+			<input key={id} className="btn btn-default btn-warning" type="button" id = {subreddit + "_selector"} value={subreddit} onClick={() => this.switchActiveSubreddit(subreddit)}></input>
 		)
 	}
 

@@ -31,7 +31,7 @@ module Scraper
 		linter = ScoreLinter.new
 		doc = Nokogiri::HTML(open("https://www.reddit.com/r/" + subreddit + "/", 'User-Agent' => 'Tempest'))
 
-		entries = doc.css('.thing')
+		entries = doc.css('.thing')[0..10]
 		entriesArray = []
 		entries.each do |entry|
 			title = entry.css('p.title>a').text

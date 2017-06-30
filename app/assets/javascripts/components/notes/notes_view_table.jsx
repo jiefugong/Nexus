@@ -19,6 +19,10 @@ class NotesViewTable extends React.Component {
 		this.state = {
 			activeTopic: null,
 			allTopics: null,
+			activeEntry: {
+				title: "Please click on an entry to get started!",
+				entry: "Check the left hand side for all the currently stored notes entries by topic!"
+			},
 			activeEntries: null,
 			results: null,
 		}
@@ -31,7 +35,17 @@ class NotesViewTable extends React.Component {
 		this.state.activeEntries = this.props.results.filter((result) => result.topic === this.props.activeTopic);
 	}
 
+	_selectClickedButton(newTopic) {
+		// TODO: There has to be a better way to use the JQuery selector than this...
+		if (this.state.activeTopic !== null) {
+			$("#" + this.state.activeTopic + "_selector").removeClass("active");
+		}
+		$("#" + newTopic + "_selector").addClass("active");
+	}
+
 	switchActiveTopic(newTopic) {
+		this._selectClickedButton(newTopic);
+
 		this.setState({
 			activeTopic: newTopic
 		});
@@ -40,9 +54,16 @@ class NotesViewTable extends React.Component {
 		})
 	}
 
+	switchActiveEntry(title) {
+		this.setState({
+			// TODO: May not work depending on initial object
+			activeEntry: this.state.activeEntries.filter((entry) => entry.title === title)[0]
+		})
+	}
+
 	renderTableEntry(id, title, text) {
 		return (
-			<tr key={id}>
+			<tr key={id} onClick={() => this.switchActiveEntry(title)}>
 				<td>
 					{title}
 				</td>
@@ -62,7 +83,7 @@ class NotesViewTable extends React.Component {
 
 	renderTopicTab(topic) {
 		return (
-			<input key={topic.toString()} className="btn btn-default notes-btn" type="button" value={topic}></input>
+			<input key={topic.toString()} className="btn btn-default btn-warning notes-btn" id = {topic + "_selector"} type="button" value={topic} onClick={() => this.switchActiveTopic(topic)}></input>
 		)
 	}
 
@@ -98,8 +119,8 @@ class NotesViewTable extends React.Component {
 				</div>
 				<div className="col-xs-6">
 					<ViewBox
-						title={"Sample Title Display"}
-						text={"This is sample text to be displayed."}
+						title={this.state.activeEntry.title}
+						text={this.state.activeEntry.entry}
 					/>
 				</div>
 			</div>

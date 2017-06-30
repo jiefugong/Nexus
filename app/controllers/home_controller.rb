@@ -10,7 +10,7 @@ class HomeController < ApplicationController
 		@entriesArray = Entry.all
 
 		# Setup for Notes Module
-		@topics = Note.select("topic");
+		@topics = Note.select("topic").distinct;
 		# @activeTopic = @topics.first
 		@activeTopic = "Fitness"
 		@submissionsArray = Note.all
