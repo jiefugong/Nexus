@@ -1,7 +1,5 @@
 /* Functional Component for View of Entry Item */
 function ViewBox(props) {
-	/* TODO: Check if we can give a better key here, topic.id already being used in other component */
-	/* TODO: CHeck if we can give each link item a better ID here, or double check to ensure that there can be no conflicts */
 	const listItems = props.topics.map((topic, index) =>
 		<li key={index}>
 			<a data-target="/" id={topic.topic}>{topic.topic}</a>
@@ -62,18 +60,41 @@ class NotesViewTable extends React.Component {
 	/*****************************
 	 **    INTERNAL FUNCTIONS   **
 	 *****************************/
-	_toggleNoteElement(elementIdentifier, isClass=true) {
-		let $elementIdentifier = isClass ? $("." + elementIdentifier) : $("#" + elementIdentifier);
-		$elementIdentifier.hasClass("hidden") ? $elementIdentifier.removeClass("hidden") : $elementIdentifier.addClass("hidden");
+
+	 _alterElementClass(elementIdentifier, attribute, addClass=true, isClass=true) {
+	 	let $elementIdentifier = isClass ? $("." + elementIdentifier) : $("#" + elementIdentifier);
+
+	 	if (addClass && !$elementIdentifier.hasClass(attribute)) {
+	 		$elementIdentifier.addClass(attribute);
+	 	} else if (!addClass && $elementIdentifier.hasClass(attribute)) {
+	 		$elementIdentifier.removeClass(attribute);
+	 	}
 	}
 
-	_toggleNoteEditElements(noteElementsToToggle) {
-		for (noteElement of noteElementsToToggle) {
-			this._toggleNoteElement(noteElement);
+	/*
+	 * @param elementIdentifier: String identifier for an HTML element
+	 * @param isClass: Boolean that determines how jQuery will select the element
+	 */
+	_toggleElementClass(elementIdentifier, attribute, isClass=true) {
+		let $elementIdentifier = isClass ? $("." + elementIdentifier) : $("#" + elementIdentifier);
+		$elementIdentifier.hasClass(attribute) ? $elementIdentifier.removeClass(attribute) : $elementIdentifier.addClass(attribute);
+	}
+
+	/*
+	 * @param noteElementsToToggle: Array of strings representing all the HTML element string 
+	 * identifiers to toggle with _toggleElementClass
+	 */
+	_toggleNoteElementsVisibility(domElementsToToggle) {
+		for (domElement of domElementsToToggle) {
+			this._toggleElementClass(domElement, "hidden");
 		}
 	}
 
-	/* Makes an AJAX request to "/" to update the entries for Notes */
+	/* 
+	 * @param type: String representing the method to make the AJAX request with
+	 * @param body: Object containing the associated data with the note to modify, should contain 
+	 * title (string), topic (string), and entry (text)
+	 */
 	_makeAjaxRequest(type, body) {
 		$.ajax({
 			type: type,
@@ -87,12 +108,9 @@ class NotesViewTable extends React.Component {
 				this.setState({
 					activeEntries: this.state.results.filter((result) => result.topic === this.state.activeTopic)
 				});
-				//TODO: This is not the right way to do this
+				// TODO: Is there a cleaner way to unravel from a list?
 				this.setState({
-					activeEntry: {
-						title: body.title,
-						entry: body.entry
-					} 
+					activeEntry: this.state.activeEntries.filter((entry) => entry.title === body.title)[0]
 				});
 			}.bind(this),
 			error: function(data) {
@@ -101,19 +119,26 @@ class NotesViewTable extends React.Component {
 		});
 	}
 
-	_flushNoteEntryElements(entryElements) {
+	/*
+	 * @param entryElements: Array of strings representing HTML elements to empty of their current input
+	 */
+	_flushNoteEntryElements(domElements) {
 		// TODO: How do we clear all the entry boxes
 		return;
 	}
 
+	/*
+	 * @param title: String representing the title of the selected note entry
+	 */
 	_selectClickedRow(title) {
-		//TODO: We're getting real hacky now...
-		$(".entry-textarea-button").removeClass("disabled");
-		$(".success").removeClass("success");
-		$("#" + title.replace(/ /g, '') + "row").addClass("success");
-		$(".entry-edit-button").removeClass("disabled");
+		this._toggleElementClass("success", "success");
+		this._toggleElementClass(title.replace(/ /g, '') + "row", "success", false);
+		this._alterElementClass("entry-edit-button", "disabled", false);
 	}
 
+	/*
+	 * @param newTopic: String representing the new topic to set the state to
+	 */
 	_selectClickedTopic(newTopic) {
 		// TODO: There has to be a better way to use the JQuery selector than this...
 		if (this.state.activeTopic !== null) {
@@ -126,33 +151,44 @@ class NotesViewTable extends React.Component {
 	 **     CLASS FUNCTIONS     **
 	 *****************************/
 
+	/*
+	 * Toggles DOM elements to allow user to enter information for a new note
+	 */
 	addNewNote() {
 		this.setState({
 			creatingNote: true
 		});
-		this._toggleNoteEditElements(ADD_NOTE_TOGGLE_ELEMENTS);
+		this._toggleNoteElementsVisibility(ADD_NOTE_TOGGLE_ELEMENTS);
 	}
 
+	/*
+	 * Toggles DOM elements to cancel a user editing or adding a new note
+	 */
 	cancelEditingNote() {
 		this.setState({
 			creatingNote: false
 		});
 
-		this.state.creatingNote ? this._toggleNoteEditElements(ADD_NOTE_TOGGLE_ELEMENTS) : this._toggleNoteEditElements(EDIT_NOTE_TOGGLE_ELEMENTS);
+		this.state.creatingNote ? this._toggleNoteElementsVisibility(ADD_NOTE_TOGGLE_ELEMENTS) : this._toggleNoteElementsVisibility(EDIT_NOTE_TOGGLE_ELEMENTS);
 	}
 
+	/*
+	 * Toggles DOM elements to allow a user to edit the currently selected note
+	 */ 
 	editCurrentNote() {
-		/* TODO: Toggle the dropdown box and automatically select the current topic */
-		this._toggleNoteEditElements(EDIT_NOTE_TOGGLE_ELEMENTS);
+		this._toggleNoteElementsVisibility(EDIT_NOTE_TOGGLE_ELEMENTS);
 
 		let $activeEntryEditBox = $(".entry-textarea");
 		let $activeEntryText = $(".active-entry-text");
 		$activeEntryEditBox.val($activeEntryText.html());
 
-		$("#" + this.state.activeTopic).addClass("selected");
+		this._alterElementClass(this.state.activeTopic, "selected", true, false);
 	}
 
-	/* Called when the Save Button is clicked, triggering appropriate actions to save data edited in the form */
+	/*
+	 * Grabs the title, entry, and topic representing a full note and saves its state by making either an
+	 * AJAX POST or PATCH request 
+	 */ 
 	modifyActiveEntries() {
 		// TODO: Hard to read, topic is either the actively selected option in the dropdown or user-entered
 		let title = this.state.creatingNote ? $(".new-entry-title").val() : $(".active-entry-title").html();
@@ -167,25 +203,32 @@ class NotesViewTable extends React.Component {
 
 		if (this.state.creatingNote) {
 			this._makeAjaxRequest(POST, ajaxData);
-			this._toggleNoteEditElements(ADD_NOTE_TOGGLE_ELEMENTS);
+			this._toggleNoteElementsVisibility(ADD_NOTE_TOGGLE_ELEMENTS);
 			// this._flushNoteEntryElements(ADD_NOTE_ENTRY_ELEMENTS);
 		} else {
 			this._makeAjaxRequest(PATCH, ajaxData);
-			this._toggleNoteEditElements(EDIT_NOTE_TOGGLE_ELEMENTS);
+			this._toggleNoteElementsVisibility(EDIT_NOTE_TOGGLE_ELEMENTS);
 		}
 	}
 
+	/*
+	 * Updates the React state with the new topic to trigger a rerender of the 
+	 * notes shown in our list (organized by topic)
+	 */
 	switchActiveTopic(newTopic) {
 		this._selectClickedTopic(newTopic);
 		this.setState({
 			activeTopic: newTopic
 		});
 		this.setState({
-			// TODO: This.state.results not being updated, problematic
 			activeEntries: this.state.results.filter((result) => result.topic === newTopic)
 		})
 	}
 
+	/*
+	 * Updates the React state with the clicked note to trigger a rerender of the
+	 * viewing well
+	 */ 
 	switchActiveEntry(title) {
 		this._selectClickedRow(title);
 
@@ -194,6 +237,9 @@ class NotesViewTable extends React.Component {
 		})
 	}
 
+	/*
+	 * Renders a single entry of the table, including the title and a short preview
+	 */
 	renderTableEntry(id, title, text) {
 		return (
 			<tr key={id} className="module-table-row" id={title.replace(/ /g, '') + "row"} onClick={() => this.switchActiveEntry(title)}>
@@ -207,16 +253,25 @@ class NotesViewTable extends React.Component {
 		)
 	}
 
+	/*
+	 * Maps all of the active entries by topic to be rendered
+	 */
 	renderTableEntries() {
 		return this.state.activeEntries.map((entry) => this.renderTableEntry(entry.id, entry.title, entry.entry));
 	}
 
+	/*
+	 * Renders a single button representing a topic stored in the database
+	 */ 
 	renderTopicTab(topic) {
 		return (
 			<input key={topic.toString()} className="btn btn-default btn-warning notes-btn" id = {topic + "_selector"} type="button" value={topic} onClick={() => this.switchActiveTopic(topic)}></input>
 		)
 	}
 
+	/*
+	 * Maps all of the available topics to be rendered
+	 */
 	renderTopicTabs() {
 		return this.state.allTopics.map((topic) => this.renderTopicTab(topic.topic))
 	}
