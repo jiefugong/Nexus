@@ -3,7 +3,15 @@ require 'scraper/scraper.rb'
 class HomeController < ApplicationController
 	include Scraper
 
-	def update
+	# We have the ability to edit topics now, but it will not update on the React end because of how update returns
+	# We are not capable of saving new notes yet (what if Note.find_by does not work?)
+	def create
+		@newEntry = Note.create(title: params[:title], entry: params[:entry], topic: params[:topic])
+		@allNotes = Note.all
+		render json: @allNotes
+	end
+
+	def edit
 		@modifiedEntry = Note.find_by(title: params[:title])
 		@modifiedEntry.entry = params[:entry]
 

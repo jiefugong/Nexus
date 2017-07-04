@@ -2,6 +2,10 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
+p {
+	word-break: break-all;
+}
+
 .module-table-row {
 	cursor: pointer;
 }
@@ -10,7 +14,7 @@
 	margin-right: 5px;
 }
 
-.notes-btn {
+.notes-btn, .new-entry-title, .dropdown {
 	margin-bottom: 10px;
 }
 
