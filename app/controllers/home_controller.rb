@@ -16,7 +16,8 @@ class HomeController < ApplicationController
 		@modifiedEntry.entry = params[:entry]
 
 		if @modifiedEntry.save
-			render json: @modifiedEntry
+			@allNotes = Note.all
+			render json: @allNotes
 		else
 			redirect_to root_path
 		end

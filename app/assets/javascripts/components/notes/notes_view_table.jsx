@@ -74,11 +74,11 @@ class NotesViewTable extends React.Component {
 	}
 
 	/* Makes an AJAX request to "/" to update the entries for Notes */
-	_makeAjaxRequest(type, data) {
+	_makeAjaxRequest(type, body) {
 		$.ajax({
 			type: type,
 			url: '/',
-			data: data,
+			data: body,
 			dataType: 'json',
 			success: function(data) {
 				this.setState({
@@ -86,6 +86,13 @@ class NotesViewTable extends React.Component {
 				});
 				this.setState({
 					activeEntries: this.state.results.filter((result) => result.topic === this.state.activeTopic)
+				});
+				//TODO: This is not the right way to do this
+				this.setState({
+					activeEntry: {
+						title: body.title,
+						entry: body.entry
+					} 
 				});
 			}.bind(this),
 			error: function(data) {
@@ -161,7 +168,7 @@ class NotesViewTable extends React.Component {
 		if (this.state.creatingNote) {
 			this._makeAjaxRequest(POST, ajaxData);
 			this._toggleNoteEditElements(ADD_NOTE_TOGGLE_ELEMENTS);
-			this._flushNoteEntryElements(ADD_NOTE_ENTRY_ELEMENTS);
+			// this._flushNoteEntryElements(ADD_NOTE_ENTRY_ELEMENTS);
 		} else {
 			this._makeAjaxRequest(PATCH, ajaxData);
 			this._toggleNoteEditElements(EDIT_NOTE_TOGGLE_ELEMENTS);
