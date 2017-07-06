@@ -9,3 +9,13 @@ $(document).on("click", ".new-entry-add-topic", function(e) {
 	$(".new-entry-dropdown").addClass("hidden");
 	$(".new-entry-new-topic").removeClass("hidden");
 });
+
+$(document).on("click", ".entry-add-button", function(e) {
+	$(".new-entry-title").val("Insert Title Here");
+	$(".entry-textarea").val("New Note");
+});
+
+$(document).on("click", ".notes-btn", function(e) {
+	$(".active").removeClass("active");
+	$(this).addClass("active");
+});
