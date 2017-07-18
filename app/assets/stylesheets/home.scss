@@ -6,6 +6,10 @@ p {
 	word-break: break-all;
 }
 
+.active-entry-text {
+	white-space: pre-wrap;
+}
+
 .module-table-row {
 	cursor: pointer;
 }

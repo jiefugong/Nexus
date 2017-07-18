@@ -23,6 +23,17 @@ class HomeController < ApplicationController
 		end
 	end
 
+	def delete
+		@entryToDelete = Note.find_by(title: params[:title])
+
+		if @entryToDelete.delete
+			@allNotes = Note.all
+			render json: @allNotes
+		else
+			redirect_to root_path
+		end
+	end
+
 	def base
 		# Setup for Reddit Module
 		@subreddits = Subreddit.all

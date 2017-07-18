@@ -40,10 +40,7 @@ class NotesViewTable extends React.Component {
 		this.state = {
 			activeTopic: null,
 			allTopics: null,
-			activeEntry: {
-				title: "Please click on an entry to view",
-				entry: "Check the left hand side for all the currently stored notes entries by topic"
-			},
+			activeEntry: LANDING_NOTE_TEXT,
 			activeEntries: null,
 			results: null,
 			creatingNote: false,
@@ -96,35 +93,13 @@ class NotesViewTable extends React.Component {
 	 * @param body: Object containing the associated data with the note to modify, should contain 
 	 * title (string), topic (string), and entry (text)
 	 */
-	_makeAjaxRequest(type, body) {
+	_makeAjaxRequest(type, body, callback) {
 		$.ajax({
 			type: type,
 			url: '/',
 			data: body,
 			dataType: 'json',
-			success: function(data) {
-				this.setState({
-					results: data,
-				});
-
-				if (this.state.creatingNote) {
-					this.setState({
-						activeTopic: body.topic
-					});
-
-					updatedTopics = new Set();
-					this.state.results.map((result) => updatedTopics.add(result.topic));
-					this.setState({
-						allTopics: Array.from(updatedTopics)
-					});
-				}
-
-				this.setState({
-					activeEntries: this.state.results.filter((result) => result.topic === this.state.activeTopic)
-				});
-
-				this.switchActiveEntry(body.title);
-			}.bind(this),
+			success: callback.bind(this),
 			error: function(data) {
 				console.log("Could not complete request save this note");
 			}
@@ -187,6 +162,28 @@ class NotesViewTable extends React.Component {
 	}
 
 	/*
+	 * Deletes the selected table entry with title TITLE
+	 */
+	deleteTableEntry(title) {
+		// TODO We need to send an AJAX request to delete the active entry, modify activeEntry,
+		// activeEntries, and results
+		let successCallback = function(data) {
+			this.setState({
+				results: data,
+				activeEntry: LANDING_NOTE_TEXT,
+				activeEntries: data.filter((element) => element.topic === this.state.activeTopic)
+			});
+		};
+
+		// TODO: Should eventually be passed the topic as well
+		let ajaxData = {
+			title: title
+		}
+
+		this._makeAjaxRequest(DELETE, ajaxData, successCallback);
+	}
+
+	/*
 	 * Grabs the title, entry, and topic representing a full note and saves its state by making either an
 	 * AJAX POST or PATCH request 
 	 */ 
@@ -202,8 +199,33 @@ class NotesViewTable extends React.Component {
 			topic: topic
 		};
 
+		let successCallback = function(data) {
+			// TODO: Combine the set state functions
+			this.setState({
+				results: data,
+			});
+
+			if (this.state.creatingNote) {
+				this.setState({
+					activeTopic: topic
+				});
+
+				updatedTopics = new Set();
+				this.state.results.map((result) => updatedTopics.add(result.topic));
+				this.setState({
+					allTopics: Array.from(updatedTopics)
+				});
+			}
+
+			this.setState({
+				activeEntries: this.state.results.filter((result) => result.topic === this.state.activeTopic)
+			});
+
+			this.switchActiveEntry(title);
+		};
+
 		if (this.state.creatingNote) {
-			this._makeAjaxRequest(POST, ajaxData);
+			this._makeAjaxRequest(POST, ajaxData, successCallback);
 			// If we add a new topic, the new topic bar isn't triggered to be 
 			let notesToToggle = ADD_NOTE_TOGGLE_ELEMENTS;
 
@@ -215,7 +237,7 @@ class NotesViewTable extends React.Component {
 			this._toggleNoteElementsVisibility(notesToToggle);
 			// this._flushNoteEntryElements(ADD_NOTE_ENTRY_ELEMENTS);
 		} else {
-			this._makeAjaxRequest(PATCH, ajaxData);
+			this._makeAjaxRequest(PATCH, ajaxData, successCallback);
 			this._toggleNoteElementsVisibility(EDIT_NOTE_TOGGLE_ELEMENTS);
 		}
 	}
@@ -257,6 +279,9 @@ class NotesViewTable extends React.Component {
 				<td>
 					{text.substring(0, DEFAULT_SUBTEXT_LENGTH) + "..."}
 				</td>
+				<td>
+					<span className="glyphicon glyphicon-remove" aria-hidden="true" onClick={() => this.deleteTableEntry(title)}/>
+				</td>
 			</tr>
 		)
 	}
@@ -296,6 +321,8 @@ class NotesViewTable extends React.Component {
 								</td>
 								<td>
 									<strong> Preview </strong>
+								</td>
+								<td>
 								</td>
 							</tr>
 							{this.renderTableEntries()}
