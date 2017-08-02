@@ -18,4 +18,12 @@
 //= require react_ujs
 //= require components
 //= require bootstrap-dropdown
+//= require moment 
+//= require fullcalendar
 //= require_tree .
+
+$(function() {
+  $('#calendar').fullCalendar({
+  	eventSources: ["/events"]
+  });
+})
