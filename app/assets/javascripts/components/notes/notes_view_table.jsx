@@ -201,7 +201,6 @@ class NotesViewTable extends React.Component {
 	 * AJAX POST or PATCH request 
 	 */ 
 	modifyActiveEntries() {
-		// TODO: Hard to read, topic is either the actively selected option in the dropdown or user-entered
 		let title = this.state.creatingNote ? $(".new-entry-title").val() : $(".active-entry-title").html();
 		let entry = $(".entry-textarea").val();
 		let topic = $(".new-entry-dropdown").hasClass("hidden") ? $(".new-entry-new-topic").val() : $(".selected").html();
@@ -270,12 +269,13 @@ class NotesViewTable extends React.Component {
 	 * viewing well
 	 */ 
 	switchActiveEntry(title) {
-		console.log(title);
 		this._selectClickedRow(title);
 
+		let activeEntry = this.state.activeEntries.filter((entry) => entry.title === title)[0];
+
 		this.setState({
-			activeEntry: this.state.activeEntries.filter((entry) => entry.title === title)[0],
-			activeTopic: this.state.activeEntry.topic
+			activeEntry: activeEntry,
+			activeTopic: activeEntry.topic
 		})
 	}
 

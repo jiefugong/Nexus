@@ -16,8 +16,3 @@ $(document).on("click", ".entry-add-button", function(e) {
 	$(".new-entry-title").val("Insert Title Here");
 	$(".entry-textarea").val("New Note");
 });
-
-// $(document).on("click", ".notes-btn", function(e) {
-// 	$(".active").removeClass("active");
-// 	$(this).addClass("active");
-// });
