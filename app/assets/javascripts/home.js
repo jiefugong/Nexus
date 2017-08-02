@@ -8,6 +8,8 @@ $(document).on("click", ".dropdown-menu li a", function(e) {
 $(document).on("click", ".new-entry-add-topic", function(e) {
 	$(".new-entry-dropdown").addClass("hidden");
 	$(".new-entry-new-topic").removeClass("hidden");
+	ADD_NOTE_TOGGLE_ELEMENTS.splice(ADD_NOTE_TOGGLE_ELEMENTS.indexOf("new-entry-dropdown"), 1);
+	ADD_NOTE_TOGGLE_ELEMENTS.push("new-entry-new-topic");
 });
 
 $(document).on("click", ".entry-add-button", function(e) {
@@ -15,7 +17,7 @@ $(document).on("click", ".entry-add-button", function(e) {
 	$(".entry-textarea").val("New Note");
 });
 
-$(document).on("click", ".notes-btn", function(e) {
-	$(".active").removeClass("active");
-	$(this).addClass("active");
-});
+// $(document).on("click", ".notes-btn", function(e) {
+// 	$(".active").removeClass("active");
+// 	$(this).addClass("active");
+// });

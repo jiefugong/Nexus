@@ -2,7 +2,7 @@
 function ViewBox(props) {
 	const listItems = props.topics.map((topic, index) =>
 		<li key={index}>
-			<a data-target="/" id={topic}>{topic}</a>
+			<a data-target="/" className="topic-list-items" onClick={() => $(".dropdown-active-topic").html(topic)} id={topic}>{topic}</a>
 		</li>
 	);
 
@@ -14,7 +14,7 @@ function ViewBox(props) {
 			<textarea className="form-control new-entry-title hidden" rows="1" defaultValue="Insert Title Here"></textarea>
 			<div className="dropdown">
 			  <button className="btn btn-default dropdown-toggle new-entry-dropdown hidden" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-			    Topic
+			    <span className="dropdown-active-topic"> {DEFAULT_TOPIC} </span>
 			    <span> </span>
 			    <span className="caret"></span>
 			  </button>
@@ -131,6 +131,8 @@ class NotesViewTable extends React.Component {
 	 * Toggles DOM elements to allow user to enter information for a new note
 	 */
 	addNewNote() {
+		$(".dropdown-active-topic").html(DEFAULT_TOPIC);
+
 		this.setState({
 			creatingNote: true
 		});
@@ -141,11 +143,18 @@ class NotesViewTable extends React.Component {
 	 * Toggles DOM elements to cancel a user editing or adding a new note
 	 */
 	cancelEditingNote() {
+		$(".dropdown-active-topic").html(DEFAULT_TOPIC);
+
 		this.setState({
 			creatingNote: false
 		});
 
 		this.state.creatingNote ? this._toggleNoteElementsVisibility(ADD_NOTE_TOGGLE_ELEMENTS) : this._toggleNoteElementsVisibility(EDIT_NOTE_TOGGLE_ELEMENTS);
+
+		if (ADD_NOTE_TOGGLE_ELEMENTS.indexOf("new-entry-new-topic")) {
+			ADD_NOTE_TOGGLE_ELEMENTS.pop();
+			ADD_NOTE_TOGGLE_ELEMENTS.push("new-entry-dropdown");
+		}
 	}
 
 	/*
@@ -168,10 +177,14 @@ class NotesViewTable extends React.Component {
 		// TODO We need to send an AJAX request to delete the active entry, modify activeEntry,
 		// activeEntries, and results
 		let successCallback = function(data) {
+			updatedTopics = new Set();
+			data.map((element) => updatedTopics.add(element.topic));
+
 			this.setState({
 				results: data,
 				activeEntry: LANDING_NOTE_TEXT,
-				activeEntries: data.filter((element) => element.topic === this.state.activeTopic)
+				activeEntries: data.filter((element) => element.topic === this.state.activeTopic),
+				allTopics: Array.from(updatedTopics)
 			});
 		};
 
@@ -200,7 +213,6 @@ class NotesViewTable extends React.Component {
 		};
 
 		let successCallback = function(data) {
-			// TODO: Combine the set state functions
 			this.setState({
 				results: data,
 			});
@@ -226,7 +238,6 @@ class NotesViewTable extends React.Component {
 
 		if (this.state.creatingNote) {
 			this._makeAjaxRequest(POST, ajaxData, successCallback);
-			// If we add a new topic, the new topic bar isn't triggered to be 
 			let notesToToggle = ADD_NOTE_TOGGLE_ELEMENTS;
 
 			if (this.state.allTopics.indexOf(topic) == -1) {
@@ -235,7 +246,6 @@ class NotesViewTable extends React.Component {
 				notesToToggle.push("new-entry-new-topic");
 			}
 			this._toggleNoteElementsVisibility(notesToToggle);
-			// this._flushNoteEntryElements(ADD_NOTE_ENTRY_ELEMENTS);
 		} else {
 			this._makeAjaxRequest(PATCH, ajaxData, successCallback);
 			this._toggleNoteElementsVisibility(EDIT_NOTE_TOGGLE_ELEMENTS);
@@ -260,10 +270,12 @@ class NotesViewTable extends React.Component {
 	 * viewing well
 	 */ 
 	switchActiveEntry(title) {
+		console.log(title);
 		this._selectClickedRow(title);
 
 		this.setState({
-			activeEntry: this.state.activeEntries.filter((entry) => entry.title === title)[0]
+			activeEntry: this.state.activeEntries.filter((entry) => entry.title === title)[0],
+			activeTopic: this.state.activeEntry.topic
 		})
 	}
 
@@ -297,8 +309,9 @@ class NotesViewTable extends React.Component {
 	 * Renders a single button representing a topic stored in the database
 	 */ 
 	renderTopicTab(topic) {
+
 		return (
-			<input key={topic.toString()} className="btn btn-default btn-warning notes-btn" type="button" value={topic} onClick={() => this.switchActiveTopic(topic)}></input>
+			<input key={topic.toString()} className={"btn btn-default btn-warning notes-btn" + (topic === this.state.activeTopic ? " active" : "")} id={topic + "_topic"} type="button" value={topic} onClick={() => this.switchActiveTopic(topic)}></input>
 		)
 	}
 
