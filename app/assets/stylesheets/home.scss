@@ -6,7 +6,11 @@ p {
 	word-break: break-all;
 }
 
-.module-table-row {
+.active-entry-text {
+	white-space: pre-wrap;
+}
+
+.module-table-row, .topic-list-items {
 	cursor: pointer;
 }
 

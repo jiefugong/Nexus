@@ -44,7 +44,7 @@ class RedditViewTable extends React.Component {
 			activeSubreddit: newSubreddit
 		});
 		this.setState({
-			activeEntries :
+			activeEntries:
 				this.state.results.filter((result) => result.subreddit === newSubreddit).splice(0, this.state.defaultNumResults)
 		});
 	}
@@ -99,10 +99,15 @@ class RedditViewTable extends React.Component {
 				)
 			}
 		} else {
+			let defaultSubredditText = this.props.subreddits.length ? "Click on a Subreddit to see results!" : "Go to settings and add some default reddits to start!"
 			return (
 				<tr>
 					<td className="text-muted">
-						Click on a Subreddit to see results!
+						{defaultSubredditText}
+					</td>
+					<td>
+					</td>
+					<td>
 					</td>
 				</tr>
 			)

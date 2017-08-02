@@ -2,7 +2,7 @@
 function ViewBox(props) {
 	const listItems = props.topics.map((topic, index) =>
 		<li key={index}>
-			<a data-target="/" id={topic}>{topic}</a>
+			<a data-target="/" className="topic-list-items" onClick={() => $(".dropdown-active-topic").html(topic)} id={topic}>{topic}</a>
 		</li>
 	);
 
@@ -14,7 +14,7 @@ function ViewBox(props) {
 			<textarea className="form-control new-entry-title hidden" rows="1" defaultValue="Insert Title Here"></textarea>
 			<div className="dropdown">
 			  <button className="btn btn-default dropdown-toggle new-entry-dropdown hidden" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-			    Topic
+			    <span className="dropdown-active-topic"> {DEFAULT_TOPIC} </span>
 			    <span> </span>
 			    <span className="caret"></span>
 			  </button>
@@ -40,10 +40,7 @@ class NotesViewTable extends React.Component {
 		this.state = {
 			activeTopic: null,
 			allTopics: null,
-			activeEntry: {
-				title: "Please click on an entry to view",
-				entry: "Check the left hand side for all the currently stored notes entries by topic"
-			},
+			activeEntry: LANDING_NOTE_TEXT,
 			activeEntries: null,
 			results: null,
 			creatingNote: false,
@@ -96,35 +93,13 @@ class NotesViewTable extends React.Component {
 	 * @param body: Object containing the associated data with the note to modify, should contain 
 	 * title (string), topic (string), and entry (text)
 	 */
-	_makeAjaxRequest(type, body) {
+	_makeAjaxRequest(type, body, callback) {
 		$.ajax({
 			type: type,
 			url: '/',
 			data: body,
 			dataType: 'json',
-			success: function(data) {
-				this.setState({
-					results: data,
-				});
-
-				if (this.state.creatingNote) {
-					this.setState({
-						activeTopic: body.topic
-					});
-
-					updatedTopics = new Set();
-					this.state.results.map((result) => updatedTopics.add(result.topic));
-					this.setState({
-						allTopics: Array.from(updatedTopics)
-					});
-				}
-
-				this.setState({
-					activeEntries: this.state.results.filter((result) => result.topic === this.state.activeTopic)
-				});
-
-				this.switchActiveEntry(body.title);
-			}.bind(this),
+			success: callback.bind(this),
 			error: function(data) {
 				console.log("Could not complete request save this note");
 			}
@@ -156,6 +131,8 @@ class NotesViewTable extends React.Component {
 	 * Toggles DOM elements to allow user to enter information for a new note
 	 */
 	addNewNote() {
+		$(".dropdown-active-topic").html(DEFAULT_TOPIC);
+
 		this.setState({
 			creatingNote: true
 		});
@@ -166,11 +143,18 @@ class NotesViewTable extends React.Component {
 	 * Toggles DOM elements to cancel a user editing or adding a new note
 	 */
 	cancelEditingNote() {
+		$(".dropdown-active-topic").html(DEFAULT_TOPIC);
+
 		this.setState({
 			creatingNote: false
 		});
 
 		this.state.creatingNote ? this._toggleNoteElementsVisibility(ADD_NOTE_TOGGLE_ELEMENTS) : this._toggleNoteElementsVisibility(EDIT_NOTE_TOGGLE_ELEMENTS);
+
+		if (ADD_NOTE_TOGGLE_ELEMENTS.indexOf("new-entry-new-topic")) {
+			ADD_NOTE_TOGGLE_ELEMENTS.pop();
+			ADD_NOTE_TOGGLE_ELEMENTS.push("new-entry-dropdown");
+		}
 	}
 
 	/*
@@ -187,11 +171,36 @@ class NotesViewTable extends React.Component {
 	}
 
 	/*
+	 * Deletes the selected table entry with title TITLE
+	 */
+	deleteTableEntry(title) {
+		// TODO We need to send an AJAX request to delete the active entry, modify activeEntry,
+		// activeEntries, and results
+		let successCallback = function(data) {
+			updatedTopics = new Set();
+			data.map((element) => updatedTopics.add(element.topic));
+
+			this.setState({
+				results: data,
+				activeEntry: LANDING_NOTE_TEXT,
+				activeEntries: data.filter((element) => element.topic === this.state.activeTopic),
+				allTopics: Array.from(updatedTopics)
+			});
+		};
+
+		// TODO: Should eventually be passed the topic as well
+		let ajaxData = {
+			title: title
+		}
+
+		this._makeAjaxRequest(DELETE, ajaxData, successCallback);
+	}
+
+	/*
 	 * Grabs the title, entry, and topic representing a full note and saves its state by making either an
 	 * AJAX POST or PATCH request 
 	 */ 
 	modifyActiveEntries() {
-		// TODO: Hard to read, topic is either the actively selected option in the dropdown or user-entered
 		let title = this.state.creatingNote ? $(".new-entry-title").val() : $(".active-entry-title").html();
 		let entry = $(".entry-textarea").val();
 		let topic = $(".new-entry-dropdown").hasClass("hidden") ? $(".new-entry-new-topic").val() : $(".selected").html();
@@ -202,9 +211,32 @@ class NotesViewTable extends React.Component {
 			topic: topic
 		};
 
+		let successCallback = function(data) {
+			this.setState({
+				results: data,
+			});
+
+			if (this.state.creatingNote) {
+				this.setState({
+					activeTopic: topic
+				});
+
+				updatedTopics = new Set();
+				this.state.results.map((result) => updatedTopics.add(result.topic));
+				this.setState({
+					allTopics: Array.from(updatedTopics)
+				});
+			}
+
+			this.setState({
+				activeEntries: this.state.results.filter((result) => result.topic === this.state.activeTopic)
+			});
+
+			this.switchActiveEntry(title);
+		};
+
 		if (this.state.creatingNote) {
-			this._makeAjaxRequest(POST, ajaxData);
-			// If we add a new topic, the new topic bar isn't triggered to be 
+			this._makeAjaxRequest(POST, ajaxData, successCallback);
 			let notesToToggle = ADD_NOTE_TOGGLE_ELEMENTS;
 
 			if (this.state.allTopics.indexOf(topic) == -1) {
@@ -213,9 +245,8 @@ class NotesViewTable extends React.Component {
 				notesToToggle.push("new-entry-new-topic");
 			}
 			this._toggleNoteElementsVisibility(notesToToggle);
-			// this._flushNoteEntryElements(ADD_NOTE_ENTRY_ELEMENTS);
 		} else {
-			this._makeAjaxRequest(PATCH, ajaxData);
+			this._makeAjaxRequest(PATCH, ajaxData, successCallback);
 			this._toggleNoteElementsVisibility(EDIT_NOTE_TOGGLE_ELEMENTS);
 		}
 	}
@@ -240,8 +271,11 @@ class NotesViewTable extends React.Component {
 	switchActiveEntry(title) {
 		this._selectClickedRow(title);
 
+		let activeEntry = this.state.activeEntries.filter((entry) => entry.title === title)[0];
+
 		this.setState({
-			activeEntry: this.state.activeEntries.filter((entry) => entry.title === title)[0]
+			activeEntry: activeEntry,
+			activeTopic: activeEntry.topic
 		})
 	}
 
@@ -256,6 +290,9 @@ class NotesViewTable extends React.Component {
 				</td>
 				<td>
 					{text.substring(0, DEFAULT_SUBTEXT_LENGTH) + "..."}
+				</td>
+				<td>
+					<span className="glyphicon glyphicon-remove" aria-hidden="true" onClick={() => this.deleteTableEntry(title)}/>
 				</td>
 			</tr>
 		)
@@ -272,8 +309,9 @@ class NotesViewTable extends React.Component {
 	 * Renders a single button representing a topic stored in the database
 	 */ 
 	renderTopicTab(topic) {
+
 		return (
-			<input key={topic.toString()} className="btn btn-default btn-warning notes-btn" type="button" value={topic} onClick={() => this.switchActiveTopic(topic)}></input>
+			<input key={topic.toString()} className={"btn btn-default btn-warning notes-btn" + (topic === this.state.activeTopic ? " active" : "")} id={topic + "_topic"} type="button" value={topic} onClick={() => this.switchActiveTopic(topic)}></input>
 		)
 	}
 
@@ -296,6 +334,8 @@ class NotesViewTable extends React.Component {
 								</td>
 								<td>
 									<strong> Preview </strong>
+								</td>
+								<td>
 								</td>
 							</tr>
 							{this.renderTableEntries()}

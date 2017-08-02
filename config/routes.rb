@@ -4,6 +4,7 @@ Rails.application.routes.draw do
 
   patch '/', to: 'home#edit'
   post '/', to: 'home#create'
+  delete '/', to: 'home#delete'
 
   get 'settings', to: 'settings#base'
   delete 'settings', to: 'settings#destroy'
