@@ -1,3 +1,19 @@
 // Place all the styles related to the Settings controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+.calendar-settings-table, .calendar-event-title, .calendar-event-description {
+	margin-bottom: 15px;
+}
+
+.calendar-event-title {
+	margin-top: 15px;
+}
+
+.glyphicon:hover {
+	cursor: pointer;
+}
+
+.calendar-form {
+	margin-top: 20px;
+}

@@ -26,5 +26,6 @@ class SettingsController < ApplicationController
 
   def base
   	@subreddits = Subreddit.all
+    @events = Event.all
   end
 end

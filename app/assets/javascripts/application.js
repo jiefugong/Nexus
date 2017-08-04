@@ -20,10 +20,5 @@
 //= require bootstrap-dropdown
 //= require moment 
 //= require fullcalendar
+//= require bootstrap-datetimepicker
 //= require_tree .
-
-$(function() {
-  $('#calendar').fullCalendar({
-  	eventSources: ["/events"]
-  });
-})
