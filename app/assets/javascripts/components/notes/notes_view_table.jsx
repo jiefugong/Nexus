@@ -151,7 +151,7 @@ class NotesViewTable extends React.Component {
 
 		this.state.creatingNote ? this._toggleNoteElementsVisibility(ADD_NOTE_TOGGLE_ELEMENTS) : this._toggleNoteElementsVisibility(EDIT_NOTE_TOGGLE_ELEMENTS);
 
-		if (ADD_NOTE_TOGGLE_ELEMENTS.indexOf("new-entry-new-topic")) {
+		if (ADD_NOTE_TOGGLE_ELEMENTS.indexOf("new-entry-new-topic") !== -1) {
 			ADD_NOTE_TOGGLE_ELEMENTS.pop();
 			ADD_NOTE_TOGGLE_ELEMENTS.push("new-entry-dropdown");
 		}
@@ -218,7 +218,8 @@ class NotesViewTable extends React.Component {
 
 			if (this.state.creatingNote) {
 				this.setState({
-					activeTopic: topic
+					activeTopic: topic,
+					creatingNote: false,
 				});
 
 				updatedTopics = new Set();
@@ -257,9 +258,7 @@ class NotesViewTable extends React.Component {
 	 */
 	switchActiveTopic(newTopic) {
 		this.setState({
-			activeTopic: newTopic
-		});
-		this.setState({
+			activeTopic: newTopic,
 			activeEntries: this.state.results.filter((result) => result.topic === newTopic)
 		})
 	}
