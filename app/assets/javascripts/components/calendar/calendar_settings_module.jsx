@@ -59,6 +59,12 @@ class CalendarSettingsModule extends React.Component {
 		$("#event-description").val('');
 		$("#datetimepicker1").data("DateTimePicker").clear();
 		$("#datetimepicker2").data("DateTimePicker").clear();
+
+		this.setState({
+			patching: false,
+			patchID: DEFAULT_PATCH_ID,
+		});
+
 		this.toggleCalendarForm();
 	}
 
@@ -160,11 +166,21 @@ class CalendarSettingsModule extends React.Component {
 		});
 	}
 
-	renderEvent(id, title) {
+	renderEvent(id, title, startDate, endDate) {
+		// Format the start and end strings to be less verbose
+		const formattedStart = startDate.split('T')[0];
+		const formattedEnd = endDate.split('T')[0];
+
 		return (
 			<tr key={id} className="calendar-event-row">
 				<td>
 					{title}
+				</td>
+				<td>
+					{formattedStart}
+				</td>
+				<td>
+					{formattedEnd}
 				</td>
 				<td>
 					<span className="glyphicon glyphicon-remove" aria-hidden="true" onClick={() => this.deleteCalendarEvent(id)}/>
@@ -177,7 +193,7 @@ class CalendarSettingsModule extends React.Component {
 	}
 
 	renderEvents() {
-		return this.state.events.map((event) => this.renderEvent(event.id, event.title));
+		return this.state.events.map((event) => this.renderEvent(event.id, event.title, event.start_time, event.end_time));
 	}
 
 	render() {
@@ -190,8 +206,16 @@ class CalendarSettingsModule extends React.Component {
 								<strong> Calendar Events </strong>
 							</td>
 							<td>
+								<strong> Start Date </strong>
 							</td>
 							<td>
+								<strong> End Date </strong>
+							</td>
+							<td>
+								<strong> Remove </strong>
+							</td>
+							<td>
+								<strong> Edit </strong>
 							</td>
 						</tr>
 						{this.renderEvents()}
@@ -232,7 +256,12 @@ class CalendarSettingsModule extends React.Component {
 					        </div>
 					    </div>
 					</div>
-					<button type="submit" className="btn btn-primary calendar-btn" onClick={() => this.submitNewCalendarEvent()}>Submit Event</button>
+					<button type="submit" className="btn btn-primary calendar-btn" onClick={() => this.submitNewCalendarEvent()}>
+						{ this.state.patching ?
+							"Edit Event" :
+							"Submit Event"
+						}
+					</button>
 					<button type="submit" className="btn btn-primary calendar-btn" onClick={() => this.resetCalendarForm()}>Cancel</button>
 				</div>
 			</div>
