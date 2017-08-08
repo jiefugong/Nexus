@@ -11,8 +11,8 @@ class CalendarSettingsModule extends React.Component {
 
 	componentDidMount() {
 		$(function() {
-			$('#datetimepicker1').datetimepicker();
-			$('#datetimepicker2').datetimepicker();
+			$(START_TIME_PICKER_ELEM).datetimepicker();
+			$(END_TIME_PICKER_ELEM).datetimepicker();
 		});
 	}
 
@@ -22,57 +22,37 @@ class CalendarSettingsModule extends React.Component {
 		});
 	}
 
-	// TODO: Improve style and move to a separate file
-	_reformatDateString (dateString) {
-		let splitString = dateString.split('T');
-		let dateComponent = splitString[0];
-		let timeComponent = splitString[1];
-
-		dateComponent = dateComponent.split('-');
-		let year = dateComponent[0];
-		let month = dateComponent[1];
-		let day = dateComponent[2];
-
-		timeComponent = timeComponent.split('.')[0].split(':');
-		let hour = timeComponent[0];
-		let minutes = timeComponent[1];
-		let timeOfDay = parseInt(hour) < 12 ? 'AM' : 'PM';
-
-		let formattedString = month + "/" + day + "/" + year + " " + hour + ":" + minutes + " " + timeOfDay;
-		return formattedString;
-	}
-
 	_populateEditForm(title, description, startTime, endTime) {
-		$("#event-title").val(title);
-		$("#event-description").val(description);
-		$('#datetimepicker1').data("DateTimePicker").date(this._reformatDateString(startTime));
-		$('#datetimepicker2').data("DateTimePicker").date(this._reformatDateString(endTime));
+		$(CALENDAR_EVENT_TITLE).val(title);
+		$(CALENDAR_EVENT_DESCRIPTION).val(description);
+		$(START_TIME_PICKER_ELEM).data("DateTimePicker").date(reformatDateString(startTime));
+		$(END_TIME_PICKER_ELEM).data("DateTimePicker").date(reformatDateString(endTime));
 	}
 
-	toggleCalendarForm() {
+	_toggleCalendarForm() {
 		let $calendarForm = $(".calendar-form");
 		$calendarForm.hasClass("hidden") ? $calendarForm.removeClass("hidden") : $calendarForm.addClass("hidden");
 	}
 
 	resetCalendarForm() {
-		$("#event-title").val('');
-		$("#event-description").val('');
-		$("#datetimepicker1").data("DateTimePicker").clear();
-		$("#datetimepicker2").data("DateTimePicker").clear();
+		$(CALENDAR_EVENT_TITLE).val('');
+		$(CALENDAR_EVENT_DESCRIPTION).val('');
+		$(START_TIME_PICKER_ELEM).data("DateTimePicker").clear();
+		$(END_TIME_PICKER_ELEM).data("DateTimePicker").clear();
 
 		this.setState({
 			patching: false,
 			patchID: DEFAULT_PATCH_ID,
 		});
 
-		this.toggleCalendarForm();
+		this._toggleCalendarForm();
 	}
 
 	submitNewCalendarEvent() {
-		let startDate = new Date($("#datetimepicker1").data()["date"]);
-		let endDate = new Date($("#datetimepicker2").data()["date"]);
-		let eventTitle = $("#event-title").val();
-		let eventDescription = $("#event-description").val();
+		let startDate = new Date($(START_TIME_PICKER_ELEM).data()["date"]);
+		let endDate = new Date($(END_TIME_PICKER_ELEM).data()["date"]);
+		let eventTitle = $(CALENDAR_EVENT_TITLE).val();
+		let eventDescription = $(CALENDAR_EVENT_DESCRIPTION).val();
 
 		let body = {
 			title: eventTitle,
@@ -81,7 +61,22 @@ class CalendarSettingsModule extends React.Component {
 			end_time: endDate,
 		};
 
-		!this.state.patching ?  (
+		this.state.patching ?  (
+			$.ajax({
+				type: PATCH,
+				url: '/events/' + this.state.patchID,
+				data: body,
+				dataType: 'json',
+				success: function(data) {
+					this.setState({
+						events: data,
+					});
+					this.resetCalendarForm();
+				}.bind(this),
+				error: function(data) {
+					console.log("Could not patch event");
+				}
+			})) : (
 			$.ajax({
 				type: POST,
 				url: '/events',
@@ -97,34 +92,11 @@ class CalendarSettingsModule extends React.Component {
 				error: function(data) {
 					console.log("Could not create new Calendar event");
 				}
-			})) : (
-			$.ajax({
-				type: PATCH,
-				url: '/events/' + this.state.patchID,
-				data: body,
-				dataType: 'json',
-				success: function(data) {
-					console.log(data);
-
-					this.setState({
-						events: data,
-						patching: false,
-						patchID: DEFAULT_PATCH_ID,
-					});
-
-					this.resetCalendarForm();
-				}.bind(this),
-				error: function(data) {
-					console.log("Could not patch event");
-				}
 			})
 		);
 	}
 
 	editCalendarEvent(id) {
-		// Get the event information based on the id
-		// Populate the form and allow the user to edit it
-		// On save, patch the item
 		$.ajax({
 			type: GET,
 			url: '/events/' + id,
@@ -140,7 +112,7 @@ class CalendarSettingsModule extends React.Component {
 				let startTime = data['start_time'];
 				let endTime = data['end_time'];
 
-				this.toggleCalendarForm();
+				this._toggleCalendarForm();
 				this._populateEditForm(title, description, startTime, endTime);
 			}.bind(this),
 			error: function(data) {
@@ -155,7 +127,6 @@ class CalendarSettingsModule extends React.Component {
 			url: '/events/' + id,
 			dataType: 'json',
 			success: function(data){
-				console.log(data);
 				this.setState({
 					events: data,
 				});
@@ -221,20 +192,28 @@ class CalendarSettingsModule extends React.Component {
 						{this.renderEvents()}
 					</tbody>
 				</table>
-				<button type="submit" className="btn btn-primary calendar-btn" onClick={() => this.toggleCalendarForm()}>New Event</button>
+
+				<button type="submit" className="btn btn-primary calendar-btn" onClick={() => this._toggleCalendarForm()}>
+					New Event
+				</button>
+
 				<div className="calendar-form well hidden">
 					<div className="row">
 						<div className="col-xs-8 calendar-event-title">
 							<div className="input-group">
-							  <span className="input-group-addon" id="basic-addon3"> Event Title </span>
-							  <input type="text" className="form-control" id="event-title" aria-describedby="basic-addon3"/>
+								<span className="input-group-addon" id="basic-addon3">
+									Event Title
+								</span>
+								<input type="text" className="form-control" id="event-title" aria-describedby="basic-addon3"/>
 							</div>
 						</div>
 						<div className="col-xs-12 calendar-event-description">
 							<textarea className="form-control" rows="3" id="event-description" defaultValue="Event Description"/>
 						</div>
 						<div className='col-xs-6'>
-							<label for="datetimepicker1">Start Time</label>
+							<label for="datetimepicker1">
+								Start Time
+							</label>
 					        <div className="form-group">
 					            <div className='input-group date' id='datetimepicker1'>
 					                <input type='text' className="form-control" />
@@ -245,7 +224,9 @@ class CalendarSettingsModule extends React.Component {
 					        </div>
 					    </div>
 					    <div className='col-xs-6'>
-					    	<label for="datetimepicker2">End Time</label>
+					    	<label for="datetimepicker2">
+					    		End Time
+					    	</label>
 					        <div className="form-group">
 					            <div className='input-group date' id='datetimepicker2'>
 					                <input type='text' className="form-control" />
