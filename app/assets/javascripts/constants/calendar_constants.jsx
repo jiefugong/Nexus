@@ -1,0 +1,1 @@
+const DEFAULT_PATCH_ID = -1;

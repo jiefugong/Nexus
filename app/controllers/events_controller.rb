@@ -10,6 +10,8 @@ class EventsController < ApplicationController
   # GET /events/1
   # GET /events/1.json
   def show
+    @event = Event.find_by(id: params[:id])
+    render json: @event
   end
 
   # GET /events/new
@@ -24,7 +26,7 @@ class EventsController < ApplicationController
   # POST /events
   # POST /events.json
   def create
-    @event = Event.create(title: params[:title], description: params[:description], start_time: params[:start], end_time: params[:end])
+    @event = Event.create(title: params[:title], description: params[:description], start_time: params[:start_time], end_time: params[:end_time])
     @allEvents = Event.all
     render json: @allEvents
   end
@@ -32,15 +34,9 @@ class EventsController < ApplicationController
   # PATCH/PUT /events/1
   # PATCH/PUT /events/1.json
   def update
-    respond_to do |format|
-      if @event.update(event_params)
-        format.html { redirect_to @event, notice: 'Event was successfully updated.' }
-        format.json { render :show, status: :ok, location: @event }
-      else
-        format.html { render :edit }
-        format.json { render json: @event.errors, status: :unprocessable_entity }
-      end
-    end
+    @event.update(title: params[:title], description: params[:description], start_time: params[:start_time], end_time: params[:end_time])
+    @allEvents = Event.all
+    render json: @allEvents
   end
 
   # DELETE /events/1

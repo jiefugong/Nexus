@@ -4,6 +4,8 @@ class CalendarSettingsModule extends React.Component {
 		super();
 		this.state = {
 			events: null,
+			patching: false,
+			patchID: DEFAULT_PATCH_ID,
 		};
 	}
 
@@ -18,6 +20,33 @@ class CalendarSettingsModule extends React.Component {
 		this.setState({
 			events: this.props.events
 		});
+	}
+
+	// TODO: Improve style and move to a separate file
+	_reformatDateString (dateString) {
+		let splitString = dateString.split('T');
+		let dateComponent = splitString[0];
+		let timeComponent = splitString[1];
+
+		dateComponent = dateComponent.split('-');
+		let year = dateComponent[0];
+		let month = dateComponent[1];
+		let day = dateComponent[2];
+
+		timeComponent = timeComponent.split('.')[0].split(':');
+		let hour = timeComponent[0];
+		let minutes = timeComponent[1];
+		let timeOfDay = parseInt(hour) < 12 ? 'AM' : 'PM';
+
+		let formattedString = month + "/" + day + "/" + year + " " + hour + ":" + minutes + " " + timeOfDay;
+		return formattedString;
+	}
+
+	_populateEditForm(title, description, startTime, endTime) {
+		$("#event-title").val(title);
+		$("#event-description").val(description);
+		$('#datetimepicker1').data("DateTimePicker").date(this._reformatDateString(startTime));
+		$('#datetimepicker2').data("DateTimePicker").date(this._reformatDateString(endTime));
 	}
 
 	toggleCalendarForm() {
@@ -42,26 +71,76 @@ class CalendarSettingsModule extends React.Component {
 		let body = {
 			title: eventTitle,
 			description: eventDescription,
-			start: startDate,
-			end: endDate,
+			start_time: startDate,
+			end_time: endDate,
 		};
 
-		$.ajax({
-			type: POST,
-			url: '/events',
-			data: body,
-			dataType: 'json',
-			success: function(data){
-				this.setState({
-					events: data,
-				});
+		!this.state.patching ?  (
+			$.ajax({
+				type: POST,
+				url: '/events',
+				data: body,
+				dataType: 'json',
+				success: function(data) {
+					this.setState({
+						events: data,
+					});
 
-				this.resetCalendarForm();
+					this.resetCalendarForm();
+				}.bind(this),
+				error: function(data) {
+					console.log("Could not create new Calendar event");
+				}
+			})) : (
+			$.ajax({
+				type: PATCH,
+				url: '/events/' + this.state.patchID,
+				data: body,
+				dataType: 'json',
+				success: function(data) {
+					console.log(data);
+
+					this.setState({
+						events: data,
+						patching: false,
+						patchID: DEFAULT_PATCH_ID,
+					});
+
+					this.resetCalendarForm();
+				}.bind(this),
+				error: function(data) {
+					console.log("Could not patch event");
+				}
+			})
+		);
+	}
+
+	editCalendarEvent(id) {
+		// Get the event information based on the id
+		// Populate the form and allow the user to edit it
+		// On save, patch the item
+		$.ajax({
+			type: GET,
+			url: '/events/' + id,
+			dataType: 'json',
+			success: function(data) {
+				this.setState({
+					patching: true,
+					patchID: id,
+				})
+
+				let title = data['title'];
+				let description = data['description'];
+				let startTime = data['start_time'];
+				let endTime = data['end_time'];
+
+				this.toggleCalendarForm();
+				this._populateEditForm(title, description, startTime, endTime);
 			}.bind(this),
 			error: function(data) {
-				console.log("Could not create new Calendar event");
+				console.log("Could not edit Calendar event");
 			}
-		});
+		})
 	}
 
 	deleteCalendarEvent(id) {
@@ -90,6 +169,9 @@ class CalendarSettingsModule extends React.Component {
 				<td>
 					<span className="glyphicon glyphicon-remove" aria-hidden="true" onClick={() => this.deleteCalendarEvent(id)}/>
 				</td>
+				<td>
+					<span className="glyphicon glyphicon-edit" aria-hidden="true" onClick={() => this.editCalendarEvent(id)}/>
+				</td>
 			</tr>
 		)
 	}
@@ -105,7 +187,9 @@ class CalendarSettingsModule extends React.Component {
 					<tbody>
 						<tr>
 							<td>
-								Calendar Events
+								<strong> Calendar Events </strong>
+							</td>
+							<td>
 							</td>
 							<td>
 							</td>

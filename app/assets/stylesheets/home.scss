@@ -29,3 +29,15 @@ p {
 .view-box {
 	margin-bottom: 20px;
 }
+
+.fc-title, .fc-time {
+	color: white;
+
+	&:hover {
+		cursor: default;
+	}
+}
+
+#calendar {
+	margin-bottom: 40px;
+}

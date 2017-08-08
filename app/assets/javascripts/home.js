@@ -16,3 +16,7 @@ $(document).on("click", ".entry-add-button", function(e) {
 	$(".new-entry-title").val("Insert Title Here");
 	$(".entry-textarea").val("New Note");
 });
+
+$(document).on("click", ".fc-event-container", function(e) {
+	e.preventDefault();
+});
