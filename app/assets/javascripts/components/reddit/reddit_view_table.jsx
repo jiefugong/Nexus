@@ -8,6 +8,9 @@ class RedditViewTable extends React.Component {
 	      activeEntries: null,
 		  results: null,
 	    };
+
+	    this.switchActiveSubreddit = this.switchActiveSubreddit.bind(this);
+	    this.sortEntriesByScore = this.sortEntriesByScore.bind(this);
 	}
 
 	componentDidMount() {
@@ -21,32 +24,6 @@ class RedditViewTable extends React.Component {
 			return 0;
 		}
 		return entry1.score > entry2.score ? -1 : 1;
-	}
-
-	sortEntriesByScore() {
-		this.setState({
-			activeEntries : this.state.activeEntries.sort(this._sortByScoreComparator)
-		});
-	}
-
-	_selectClickedButton(newSubreddit) {
-		// TODO: There has to be a better way to use the JQuery selector than this...
-		if (this.state.activeSubreddit !== "...") {
-			$("#" + this.state.activeSubreddit + "_selector").removeClass("active");
-		}
-		$("#" + newSubreddit + "_selector").addClass("active");
-	}
-
-	switchActiveSubreddit(newSubreddit) {
-		this._selectClickedButton(newSubreddit);
-
-		this.setState({
-			activeSubreddit: newSubreddit
-		});
-		this.setState({
-			activeEntries:
-				this.state.results.filter((result) => result.subreddit === newSubreddit).splice(0, this.state.defaultNumResults)
-		});
 	}
 
 	_formatLinkType(link) {
@@ -64,6 +41,20 @@ class RedditViewTable extends React.Component {
 			'url' : url,
 			'urlType' : urlType,
 		}
+	}
+
+	sortEntriesByScore() {
+		this.setState({
+			activeEntries : this.state.activeEntries.sort(this._sortByScoreComparator)
+		});
+	}
+
+	switchActiveSubreddit(newSubreddit) {
+		this.setState({
+			activeSubreddit: newSubreddit,
+			activeEntries:
+				this.state.results.filter((result) => result.subreddit === newSubreddit).splice(0, this.state.defaultNumResults),
+		});
 	}
 
 	renderTableEntry(id, score, title, link) {
@@ -105,10 +96,8 @@ class RedditViewTable extends React.Component {
 					<td className="text-muted">
 						{defaultSubredditText}
 					</td>
-					<td>
-					</td>
-					<td>
-					</td>
+					<td/>
+					<td/>
 				</tr>
 			)
 		}
@@ -116,7 +105,7 @@ class RedditViewTable extends React.Component {
 
 	renderSubredditButton(id, subreddit) {
 		return (
-			<input key={id} className="btn btn-default btn-warning" type="button" id = {subreddit + "_selector"} value={subreddit} onClick={() => this.switchActiveSubreddit(subreddit)}></input>
+			<Button key={id} buttonActive={this.state.activeSubreddit === subreddit} subreddit={subreddit} onClick={() => this.switchActiveSubreddit(subreddit)}/>
 		)
 	}
 
@@ -149,7 +138,7 @@ class RedditViewTable extends React.Component {
 						{this.renderSubredditButtons()}
 					</div>
 					<div className="col-xs-3">
-						<input className="btn btn-default btn-primary pull-right" type="button" value="Sort" onClick={() => this.sortEntriesByScore()}></input>
+						<input className="btn btn-default btn-primary pull-right" type="button" value="Sort" onClick={() => this.sortEntriesByScore()}/>
 						<a className="btn btn-default btn-primary pull-right" href="/settings">Settings</a>
 					</div>
 				</div>
