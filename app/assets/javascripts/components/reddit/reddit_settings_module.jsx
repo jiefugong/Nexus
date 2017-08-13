@@ -4,12 +4,23 @@ class RedditSettingsModule extends React.Component {
 		super();
 		this.state = {
 			activeSubreddits: null,
+			newSubreddit: "",
 		};
+
+		this._handleChange = this._handleChange.bind(this);
+		this.renderSubreddit = this.renderSubreddit.bind(this);
+		this.renderSubreddits = this.renderSubreddits.bind(this);
 	}
 
-	_alterActiveSubreddits(request_type, subreddit) {
+	_handleChange(event) {
+		this.setState({
+			newSubreddit: event.target.value,
+		});
+	}
+
+	_alterActiveSubreddits(requestType, subreddit) {
 		$.ajax({
-			type: request_type,
+			type: requestType,
 			url: '/settings',
 			data: {subreddit: subreddit},
 			dataType: 'json',
@@ -24,6 +35,7 @@ class RedditSettingsModule extends React.Component {
 		})
 	}
 
+	// TODO: This is an incorrect way to set the activeSubreddits
 	componentWillMount() {
 		this.state.activeSubreddits = this.props.subreddits;
 	}
@@ -35,14 +47,22 @@ class RedditSettingsModule extends React.Component {
 					{subreddit}
 				</td>
 				<td>
-					<button type="button" className="close pull-right" aria-label="Close" onClick={() => this._alterActiveSubreddits(DELETE, subreddit)}><span aria-hidden="true">&times;</span></button>
+					<button
+					  type="button"
+					  className="close pull-right"
+					  aria-label="Close"
+					  onClick={() => this._alterActiveSubreddits(DELETE, subreddit)}>
+					  	<span aria-hidden="true">
+					  		&times;
+					  	</span>
+					</button>
 				</td>
 			</tr>
 		)
 	}
 
 	renderSubreddits() {
-			return this.state.activeSubreddits.map((subreddit) => this.renderSubreddit(subreddit.id, subreddit.subreddit));
+		return this.state.activeSubreddits.map((subreddit) => this.renderSubreddit(subreddit.id, subreddit.subreddit));
 	}
 
 	render() {
@@ -52,10 +72,11 @@ class RedditSettingsModule extends React.Component {
 					<tbody>
 						<tr>
 							<td>
-								<strong> Subscribed Subreddits </strong>
+								<strong>
+									Subscribed Subreddits
+								</strong>
 							</td>
-							<td>
-							</td>
+							<td/>
 						</tr>
 						{this.renderSubreddits()}
 					</tbody>
@@ -63,10 +84,20 @@ class RedditSettingsModule extends React.Component {
 				<form className="form-inline">
 				  <div className="form-group">
 				    <div className="input-group">
-				      <input type="text" className="form-control" id="submit-subreddit" placeholder="Subreddit"></input>
+				      <input
+				        type="text"
+				        className="form-control"
+				        id="submit-subreddit"
+				        placeholder="Subreddit"
+				        onChange={this._handleChange}/>
 				    </div>
 				  </div>
-				  <button type="submit" className="btn btn-primary" onClick={() => this._alterActiveSubreddits(POST, $("#submit-subreddit").val())}>Add Subreddit</button>
+				  <button
+				    type="submit"
+				    className="btn btn-primary"
+				    onClick={() => this._alterActiveSubreddits(POST, this.state.newSubreddit)}>
+				    	Add Subreddit
+				  </button>
 				  <a className="btn btn-primary pull-right" href="/">Main Page</a>
 				</form>
 			</div>
