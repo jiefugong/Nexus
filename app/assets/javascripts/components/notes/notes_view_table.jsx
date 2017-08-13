@@ -1,38 +1,3 @@
-/* Functional Component for View of Entry Item */
-function ViewBox(props) {
-	const listItems = props.topics.map((topic, index) =>
-		<li key={index}>
-			<a data-target="/" className="topic-list-items" onClick={() => $(".dropdown-active-topic").html(topic)} id={topic}>{topic}</a>
-		</li>
-	);
-
-	return (
-		<div className="view-box well">
-			<p className="lead active-entry-title">
-				{props.title}
-			</p>
-			<textarea className="form-control new-entry-title hidden" rows="1" defaultValue="Insert Title Here"></textarea>
-			<div className="dropdown">
-			  <button className="btn btn-default dropdown-toggle new-entry-dropdown hidden" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-			    <span className="dropdown-active-topic"> {DEFAULT_TOPIC} </span>
-			    <span> </span>
-			    <span className="caret"></span>
-			  </button>
-			  <ul className="dropdown-menu" aria-labelledby="dropdownMenu1">
-			  	{listItems}
-			  	<li role="separator" className="divider"></li>
-			    <li><a className="new-entry-add-topic" data-target="/">New Topic</a></li>
-			  </ul>
-			  <textarea className="form-control new-entry-new-topic hidden" rows="1" defaultValue="New Topic"></textarea>
-			</div>
-			<p className="active-entry-text">
-				{props.text}
-			</p>
-			<textarea className="form-control entry-textarea hidden" rows="5" defaultValue="New Note"></textarea>
-		</div>
-	)
-}
-
 class NotesViewTable extends React.Component {
 
 	constructor() {
@@ -347,7 +312,7 @@ class NotesViewTable extends React.Component {
 					</div>
 				</div>
 				<div className="col-xs-6">
-					<ViewBox
+					<NotesViewWell
 						title={this.state.activeEntry.title}
 						text={this.state.activeEntry.entry}
 						topics={this.state.allTopics}
