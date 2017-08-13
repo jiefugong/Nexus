@@ -1,13 +1,14 @@
 class RedditSettingsModule extends React.Component {
 
-	constructor() {
-		super();
+	constructor(props) {
+		super(props);
 		this.state = {
-			activeSubreddits: null,
+			activeSubreddits: props.subreddits,
 			newSubreddit: "",
 		};
 
 		this._handleChange = this._handleChange.bind(this);
+		this._alterActiveSubreddits = this._alterActiveSubreddits.bind(this);
 		this.renderSubreddit = this.renderSubreddit.bind(this);
 		this.renderSubreddits = this.renderSubreddits.bind(this);
 	}
@@ -33,11 +34,6 @@ class RedditSettingsModule extends React.Component {
 				console.log("Could not complete request to alter subreddits");
 			}
 		})
-	}
-
-	// TODO: This is an incorrect way to set the activeSubreddits
-	componentWillMount() {
-		this.state.activeSubreddits = this.props.subreddits;
 	}
 
 	renderSubreddit(id, subreddit) {
