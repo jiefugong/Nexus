@@ -256,10 +256,14 @@ class JournalViewTable extends React.Component {
 						<tbody>
 							<tr>
 								<td>
-									<strong> Title </strong>
+									<strong>
+										Title
+									</strong>
 								</td>
 								<td>
-									<strong> Preview </strong>
+									<strong>
+										Preview
+									</strong>
 								</td>
 								<td>
 								</td>

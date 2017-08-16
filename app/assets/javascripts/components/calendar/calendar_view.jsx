@@ -6,7 +6,7 @@ class CalendarView extends React.Component {
   }
 
   render() {
-    return (
+  	return (
       <div id="calendar" />
     );
   }
