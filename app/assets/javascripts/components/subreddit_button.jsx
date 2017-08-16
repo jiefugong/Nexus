@@ -1,4 +1,4 @@
-class Button extends React.Component {
+class SubredditButton extends React.Component {
 
 	render() {
 		let buttonClass = "btn btn-default btn-warning";

@@ -1,22 +1,20 @@
 class RedditViewTable extends React.Component {
 
-	constructor() {
-		super();
+	constructor(props) {
+		super(props);
 		this.state = {
 		  defaultNumResults: 10,
 		  activeSubreddit: "...",
 	      activeEntries: null,
-		  results: null,
+		  results: props.entries,
 	    };
 
-	    this.switchActiveSubreddit = this.switchActiveSubreddit.bind(this);
 	    this.sortEntriesByScore = this.sortEntriesByScore.bind(this);
-	}
-
-	componentDidMount() {
-		this.state.results = this.props.entries;
-		this.state.activeEntries =
-			this.state.results.filter((result) => result.subreddit === this.state.activeSubreddit);
+	    this.switchActiveSubreddit = this.switchActiveSubreddit.bind(this);
+	    this.renderTableEntry = this.renderTableEntry.bind(this);
+	    this.renderTableEntries = this.renderTableEntries.bind(this);
+	    this.renderSubredditButton = this.renderSubredditButton.bind(this);
+	    this.renderSubredditButtons = this.renderSubredditButtons.bind(this);
 	}
 
 	_sortByScoreComparator(entry1, entry2) {
@@ -60,7 +58,8 @@ class RedditViewTable extends React.Component {
 	renderTableEntry(id, score, title, link) {
 		/* TODO: See if ES6 method is available */
 		const linkObject = this._formatLinkType(link);
-		const scoreLabel = score == 0 ? "-" : score
+		const scoreLabel = score == 0 ? "-" : score;
+
 		return (
 			<tr key={id} className="module-table-row">
 				<td>
@@ -70,7 +69,9 @@ class RedditViewTable extends React.Component {
 					{scoreLabel}
 				</td>
 				<td>
-					<a href={linkObject.url}>{linkObject.urlType}</a>
+					<a href={linkObject.url}>
+						{linkObject.urlType}
+					</a>
 				</td>
 			</tr>
 		)
@@ -105,7 +106,11 @@ class RedditViewTable extends React.Component {
 
 	renderSubredditButton(id, subreddit) {
 		return (
-			<Button key={id} buttonActive={this.state.activeSubreddit === subreddit} subreddit={subreddit} onClick={() => this.switchActiveSubreddit(subreddit)}/>
+			<SubredditButton
+			  key={id}
+			  buttonActive={this.state.activeSubreddit === subreddit}
+			  subreddit={subreddit}
+			  onClick={() => this.switchActiveSubreddit(subreddit)}/>
 		)
 	}
 
@@ -121,13 +126,19 @@ class RedditViewTable extends React.Component {
 					<tbody>
 						<tr>
 							<td>
-								<strong>Title</strong>
+								<strong>
+									Title
+								</strong>
 							</td>
 							<td>
-								<strong>Score</strong>
+								<strong>
+									Score
+								</strong>
 							</td>
 							<td>
-								<strong>Link</strong>
+								<strong>
+									Link
+								</strong>
 							</td>
 						</tr>
 						{this.renderTableEntries()}
@@ -138,8 +149,16 @@ class RedditViewTable extends React.Component {
 						{this.renderSubredditButtons()}
 					</div>
 					<div className="col-xs-3">
-						<input className="btn btn-default btn-primary pull-right" type="button" value="Sort" onClick={() => this.sortEntriesByScore()}/>
-						<a className="btn btn-default btn-primary pull-right" href="/settings">Settings</a>
+						<input
+						  className="btn btn-default btn-primary pull-right"
+						  type="button"
+						  value="Sort"
+						  onClick={() => this.sortEntriesByScore()}/>
+						<a
+						  className="btn btn-default btn-primary pull-right"
+						  href="/settings">
+						  	Settings
+						 </a>
 					</div>
 				</div>
 			</div>
