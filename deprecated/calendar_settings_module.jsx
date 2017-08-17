@@ -11,16 +11,8 @@ class CalendarSettingsModule extends React.Component {
 			patchID: DEFAULT_PATCH_ID,
 		};
 
-		this._renderEvent = this._renderEvent.bind(this);
-		this._makeAjaxRequest = this._makeAjaxRequest.bind(this);
-		this._onTitleChange = this._onTitleChange.bind(this);
-		this._onDescriptionChange = this._onDescriptionChange.bind(this);
-		this.resetForm = this.resetForm.bind(this);
-		this.renderEvents = this.renderEvents.bind(this);
-		this.creatingEvent = this.creatingEvent.bind(this);
-		this.editEvent = this.editEvent.bind(this);
-		this.deleteEvent = this.deleteEvent.bind(this);
-		this.submitEvent = this.submitEvent.bind(this);
+		this.onEventTitleChange = this.onEventTitleChange.bind(this);
+		this.onEventDescriptionChange = this.onEventDescriptionChange.bind(this);
 	}
 
 	componentDidMount() {
@@ -30,100 +22,134 @@ class CalendarSettingsModule extends React.Component {
 		});
 	}
 
-	_makeAjaxRequest(type, url, body, callback) {
-		$.ajax({
-			type: type,
-			url: url,
-			data: body,
-			dataType: 'json',
-			success: callback,
-			error: function(data) {
-				console.log("Could not complete request to modify this event");
-			}
+	_populateEditForm(title, description, startTime, endTime) {
+		this.setState({
+			eventTitle: title,
+			eventDescription: description,
 		});
+
+		$(START_TIME_PICKER_ELEM).data("DateTimePicker").date(reformatDateString(startTime));
+		$(END_TIME_PICKER_ELEM).data("DateTimePicker").date(reformatDateString(endTime));
 	}
 
-	_onTitleChange(event) {
+	onEventTitleChange (event) {
 		this.setState({
 			eventTitle: event.target.value,
 		});
 	}
 
-	_onDescriptionChange(event) {
+	onEventDescriptionChange (event) {
 		this.setState({
 			eventDescription: event.target.value,
 		});
 	}
 
-	creatingEvent() {
-		this.setState({
-			creatingEvent: true,
-		});
-	}
+	resetCalendarForm() {
+		console.log("Hello!");
 
-	resetForm() {
 		this.setState({
-			eventTitle: "",
-			eventDescription: "",
-			creatingEvent: false,
+			eventTitle: '',
+			eventDescription: '',
 			editingEvent: false,
-			patchID: -1,
+			creatingEvent: false,
+			patchID: DEFAULT_PATCH_ID,
 		});
 
-		// For now, hard to remove all pre-existing jQuery
 		$(START_TIME_PICKER_ELEM).data("DateTimePicker").clear();
 		$(END_TIME_PICKER_ELEM).data("DateTimePicker").clear();
 	}
 
-	deleteEvent(id) {
-		let successCallback = function(data) {
-			this.setState({
-				events: data,
-			});
-			this.resetForm();
-		}.bind(this);
-
-		this._makeAjaxRequest(DELETE, '/events/' + id, {}, successCallback);
-	}
-
-	editEvent(id, title, description, startDate, endDate) {
-		this.setState({
-			patchID: id,
-			editingEvent: true,
-			eventTitle: title,
-			eventDescription: description,
-		});
-
-		// For now, hard to remove all pre-existing jQuery
-		$(START_TIME_PICKER_ELEM).data("DateTimePicker").date(reformatDateString(startDate));
-		$(END_TIME_PICKER_ELEM).data("DateTimePicker").date(reformatDateString(endDate));
-	}
-
-	submitEvent() {
+	submitNewCalendarEvent() {
 		let startDate = new Date($(START_TIME_PICKER_ELEM).data()["date"]);
 		let endDate = new Date($(END_TIME_PICKER_ELEM).data()["date"]);
+		let eventTitle = $(CALENDAR_EVENT_TITLE).val();
+		let eventDescription = $(CALENDAR_EVENT_DESCRIPTION).val();
 
 		let body = {
-			title: this.state.eventTitle,
-			description: this.state.eventDescription,
+			title: eventTitle,
+			description: eventDescription,
 			start_time: startDate,
 			end_time: endDate,
-		}
+		};
 
-		let successCallback = function(data) {
-			this.setState({
-				events: data,
-			});
-			this.resetForm();
-		}.bind(this);
-
-		let requestType = this.state.creatingEvent ? POST : PATCH;
-		let requestUrl = this.state.creatingEvent ? "/events" : "/events/" + this.state.patchID;
-
-		this._makeAjaxRequest(requestType, requestUrl, body, successCallback);
+		this.state.editingEvent ?  (
+			$.ajax({
+				type: PATCH,
+				url: '/events/' + this.state.patchID,
+				data: body,
+				dataType: 'json',
+				success: function(data) {
+					this.setState({
+						events: data,
+						editingEvent: false,
+					});
+					this.resetCalendarForm();
+				}.bind(this),
+				error: function(data) {
+					console.log("Could not patch event");
+				}
+			})) : (
+			$.ajax({
+				type: POST,
+				url: '/events',
+				data: body,
+				dataType: 'json',
+				success: function(data) {
+					this.setState({
+						events: data,
+						creatingEvent: false,
+					});
+					this.resetCalendarForm();
+				}.bind(this),
+				error: function(data) {
+					console.log("Could not create new Calendar event");
+				}
+			})
+		);
 	}
 
-	_renderEvent(id, title, description, startDate, endDate) {
+	editCalendarEvent(id) {
+		$.ajax({
+			type: GET,
+			url: '/events/' + id,
+			dataType: 'json',
+			success: function(data) {
+				this.setState({
+					editingEvent: true,
+					patchID: id,
+				})
+
+				let title = data['title'];
+				let description = data['description'];
+				let startTime = data['start_time'];
+				let endTime = data['end_time'];
+
+				this._populateEditForm(title, description, startTime, endTime);
+			}.bind(this),
+			error: function(data) {
+				console.log("Could not edit Calendar event");
+			}
+		})
+	}
+
+	deleteCalendarEvent(id) {
+		$.ajax({
+			type: DELETE,
+			url: '/events/' + id,
+			dataType: 'json',
+			success: function(data){
+				this.setState({
+					events: data,
+				});
+			}.bind(this),
+			error: function(data) {
+				console.log("Could not delete Calendar event");
+			}
+		});
+	}
+
+	renderEvent(id, title, startDate, endDate) {
+		// Format the start and end strings to be less verbose
 		const formattedStart = startDate.split('T')[0];
 		const formattedEnd = endDate.split('T')[0];
 
@@ -139,23 +165,17 @@ class CalendarSettingsModule extends React.Component {
 					{formattedEnd}
 				</td>
 				<td>
-					<span
-					  className="glyphicon glyphicon-remove"
-					  aria-hidden="true"
-					  onClick={() => this.deleteEvent(id)}/>
+					<span className="glyphicon glyphicon-remove" aria-hidden="true" onClick={() => this.deleteCalendarEvent(id)}/>
 				</td>
 				<td>
-					<span
-					  className="glyphicon glyphicon-edit"
-					  aria-hidden="true"
-					  onClick={() => this.editEvent(id, title, description, startDate, endDate)}/>
+					<span className="glyphicon glyphicon-edit" aria-hidden="true" onClick={() => this.editCalendarEvent(id)}/>
 				</td>
 			</tr>
 		)
 	}
 
 	renderEvents() {
-		return this.state.events.map((event) => this._renderEvent(event.id, event.title, event.description, event.start_time, event.end_time));
+		return this.state.events.map((event) => this.renderEvent(event.id, event.title, event.start_time, event.end_time));
 	}
 
 	render() {
@@ -184,10 +204,7 @@ class CalendarSettingsModule extends React.Component {
 					</tbody>
 				</table>
 
-				<button
-				  type="submit"
-				  className={"btn btn-primary calendar-btn" + (this.state.creatingEvent || this.state.editingEvent ? " hidden" : "")}
-				  onClick={() => this.creatingEvent()}>
+				<button type="submit" className="btn btn-primary calendar-btn" onClick={() => this.setState({ creatingEvent: true })}>
 					New Event
 				</button>
 
@@ -203,8 +220,8 @@ class CalendarSettingsModule extends React.Component {
 								  className="form-control"
 								  id="event-title"
 								  aria-describedby="basic-addon3"
-								  value={this.state.eventTitle}
-								  onChange={this._onTitleChange}/>
+								  placeholder={this.state.editingEvent ? this.state.eventTitle : ""}
+								  onChange={this.onEventTitleChange}/>
 							</div>
 						</div>
 						<div className="col-xs-12 calendar-event-description">
@@ -212,8 +229,8 @@ class CalendarSettingsModule extends React.Component {
 							  className="form-control"
 							  rows="3"
 							  id="event-description"
-							  value={this.state.eventDescription}
-							  onChange={this._onDescriptionChange}/>
+							  defaultValue={(this.state.editingEvent || this.state.creatingEvent) ? this.state.eventDescription : "Event Description"}
+							  onChange={this.onEventDescriptionChange}/>
 						</div>
 						<div className='col-xs-6'>
 							<label for="datetimepicker1">
@@ -221,7 +238,7 @@ class CalendarSettingsModule extends React.Component {
 							</label>
 					        <div className="form-group">
 					            <div className='input-group date' id='datetimepicker1'>
-					                <input type='text' className="form-control"/>
+					                <input type='text' className="form-control" />
 					                <span className="input-group-addon">
 					                    <span className="glyphicon glyphicon-calendar"></span>
 					                </span>
@@ -242,21 +259,13 @@ class CalendarSettingsModule extends React.Component {
 					        </div>
 					    </div>
 					</div>
-					<button
-					  type="submit"
-					  className="btn btn-primary calendar-btn"
-					  onClick={() => this.submitEvent()}>
+					<button type="submit" className="btn btn-primary calendar-btn" onClick={() => this.submitNewCalendarEvent()}>
 						{ this.state.editingEvent ?
 							"Edit Event" :
 							"Submit Event"
 						}
 					</button>
-					<button
-					  type="submit"
-					  className="btn btn-primary calendar-btn"
-					  onClick={() => this.resetForm()}>
-						Cancel
-					</button>
+					<button type="submit" className="btn btn-primary calendar-btn" onClick={() => this.resetCalendarForm()}>Cancel</button>
 				</div>
 			</div>
 		);
