@@ -2,28 +2,14 @@ class JournalViewWell extends React.Component {
 
 	constructor() {
 		super();
-		this.state = {
-			selectedTopic: null,
-			newTopic: false,
-		}
 
 		this._setSelectedTopic = this._setSelectedTopic.bind(this);
-		this._setNewTopic = this._setNewTopic.bind(this);
 	}
 
 	_setSelectedTopic(topic) {
-		this.setState({
-			selectedTopic: topic,
-			newTopic: false,
-		});
-
+		this.props.setSelectedTopic(topic);
+		this.props.setNewTopic(false);
 		this.props.onTopicChange(topic);
-	}
-
-	_setNewTopic() {
-		this.setState({
-			newTopic: true,
-		});
 	}
 
 	render() {
@@ -48,7 +34,7 @@ class JournalViewWell extends React.Component {
 							  rows="1"
 							  defaultValue={this.props.editingNote ? this.props.activeEntry.title : "Insert Title Here"}
 							  onChange={this.props.onTitleChange}/>
-							<div className={"dropdown" + (this.state.newTopic ? " hidden" : "")}>
+							<div className={"dropdown" + (this.props.newTopic ? " hidden" : "")}>
 								<button
 								  className="btn btn-default dropdown-toggle new-entry-dropdown"
 								  type="button"
@@ -57,10 +43,10 @@ class JournalViewWell extends React.Component {
 								  aria-haspopup="true"
 								  aria-expanded="true">
 									<span className="dropdown-active-topic">
-										{!this.state.selectedTopic ?
+										{!this.props.selectedTopic ?
                                             (this.props.editingNote ? this.props.activeEntry.topic : DEFAULT_TOPIC)
                                             :
-                                            this.state.selectedTopic
+                                            this.props.selectedTopic
                                         }
 									</span>
 								    <span> </span>
@@ -71,16 +57,16 @@ class JournalViewWell extends React.Component {
 							  		<li role="separator" className="divider"/>
 							  		<li>
 							  			<a
-							  			  className={"new-entry-add-topic" + (this.state.newTopic ? " selected" : "")}
+							  			  className={"new-entry-add-topic" + (this.props.newTopic ? " selected" : "")}
 							  			  data-target="/"
-							  			  onClick={() => this._setNewTopic()}>
+							  			  onClick={() => this.props.setNewTopic(true)}>
 							  				New topic
 							  			</a>
 							  		</li>
 							  	</ul>
 							</div>
 							<textarea
-						  	  className={"form-control new-entry-new-topic" + (!this.state.newTopic ? " hidden" : "")}
+						  	  className={"form-control new-entry-new-topic" + (!this.props.newTopic ? " hidden" : "")}
 						  	  rows="1"
 						  	  defaultValue="New Topic"
 						  	  onChange={(event) => this.props.onTopicChange(event.target.value)}/>

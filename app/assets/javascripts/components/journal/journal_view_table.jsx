@@ -10,6 +10,8 @@ class JournalViewTable extends React.Component {
 			results: props.results,
 			creatingNote: false,
 			editingNote: false,
+			newTopic: false,
+			selectedTopic: "",
 			newNoteTitle: "",
 			newNoteTopic: "",
 			newNoteText: "",
@@ -26,6 +28,8 @@ class JournalViewTable extends React.Component {
 		this.deleteNote = this.deleteNote.bind(this);
 		this.editNote = this.editNote.bind(this);
 		this.saveNote = this.saveNote.bind(this);
+		this.setNewTopic = this.setNewTopic.bind(this);
+		this.setSelectedTopic = this.setSelectedTopic.bind(this);
 		this._handleNewTitleChange = this._handleNewTitleChange.bind(this);
 		this._handleNewTopicChange = this._handleNewTopicChange.bind(this);
 		this._handleNewTextChange = this._handleNewTextChange.bind(this);
@@ -52,12 +56,23 @@ class JournalViewTable extends React.Component {
 		});
 	}
 
+	setNewTopic(newTopic) {
+		this.setState({
+			newTopic: newTopic,
+		});
+	}
+
+	setSelectedTopic(topic) {
+		this.setState({
+			selectedTopic: topic,
+		});
+	}
+
 	_handleNewTitleChange (event) {
 		this.setState({
 			newNoteTitle: event.target.value,
 		});
 	}
-
 
 	// This event handler slightly different because multiple ways to set topic
 	_handleNewTopicChange (topic) {
@@ -129,6 +144,8 @@ class JournalViewTable extends React.Component {
 		this.setState({
 			creatingNote: false,
 			editingNote: false,
+			newTopic: false,
+			selectedTopic: "",
 		});
 	}
 
@@ -282,12 +299,16 @@ class JournalViewTable extends React.Component {
 						title={this.state.activeEntry.title}
 						text={this.state.activeEntry.entry}
 						topics={this.state.allTopics}
+						newTopic={this.state.newTopic}
+						selectedTopic={this.state.selectedTopic}
 						creatingNote={this.state.creatingNote}
 						editingNote={this.state.editingNote}
 						activeEntry={this.state.activeEntry}
 						onTitleChange={this._handleNewTitleChange}
 						onTopicChange={this._handleNewTopicChange}
 						onTextChange={this._handleNewTextChange}
+						setNewTopic={this.setNewTopic}
+						setSelectedTopic={this.setSelectedTopic}
 					/>
 					{this.renderPostButtons()}
 				</div>
