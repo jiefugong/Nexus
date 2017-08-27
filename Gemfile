@@ -31,6 +31,8 @@ gem 'fullcalendar-rails'
 gem 'momentjs-rails'
 gem 'bootstrap3-datetimepicker-rails', '~> 4.17.47'
 
+gem 'gmail', :git => 'https://github.com/gmailgem/gmail.git'
+
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks

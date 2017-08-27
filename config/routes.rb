@@ -11,6 +11,8 @@ Rails.application.routes.draw do
   delete 'settings', to: 'settings#destroy'
   post 'settings', to: 'settings#create'
 
+  get 'emails', to: 'emails#authenticate'
+
   root 'home#base'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end
